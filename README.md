@@ -2,7 +2,7 @@
 
 ## 1. TTS组件MAVEN依赖图
 
-![](tts依赖关系.jpg)
+![](images/tts依赖关系.jpg)
 
 其中 `tcsp-component-tts` 为轨迹服务核心模块，其中图示下方为通用依赖
 
@@ -38,7 +38,7 @@
 ## 3. TTS开放接口
 ### 3.1 外部轨迹服务接入（G7）
 
-![](ttsG7业务图.jpg)
+![](images/ttsG7业务图.jpg)
 
 1. `SystemRemoteService`开放通用接口方法供其他服务调用，
    将`tcsp-component-tts-remote`打成jar包，其他项目进行依赖即可
