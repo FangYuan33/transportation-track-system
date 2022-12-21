@@ -5,16 +5,16 @@ package com.tts.base.constant;
  */
 public enum BaseServerType {
 
-		MASTER("MASTER"),
-		SLAVER("SLAVER");
+    MASTER("MASTER"),
+    SLAVER("SLAVER");
 
-		private final String name;
+    private final String name;
 
-		BaseServerType(String name){
-				this.name = name;
-		}
+    BaseServerType(String name) {
+        this.name = name;
+    }
 
-		public String getName() {
-				return name;
-		}
+    public String getName() {
+        return name;
+    }
 }

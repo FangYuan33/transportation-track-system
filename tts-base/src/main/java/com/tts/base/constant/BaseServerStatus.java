@@ -5,18 +5,18 @@ package com.tts.base.constant;
  */
 public enum BaseServerStatus {
 
-		REGISTER("REGISTER"),
-		UNREGISTER("UNREGISTER"),
-		MASTER("MASTER"),
-		UNMASTER("UNMASTER");
+    REGISTER("REGISTER"),
+    UNREGISTER("UNREGISTER"),
+    MASTER("MASTER"),
+    UNMASTER("UNMASTER");
 
-		private final String name;
+    private final String name;
 
-		BaseServerStatus(String name){
-				this.name = name;
-		}
+    BaseServerStatus(String name) {
+        this.name = name;
+    }
 
-		public String getName() {
-				return name;
-		}
+    public String getName() {
+        return name;
+    }
 }
