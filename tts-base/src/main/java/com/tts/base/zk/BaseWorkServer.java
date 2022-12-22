@@ -5,6 +5,7 @@ import com.tts.base.constant.BaseServerType;
 import com.tts.base.dto.BaseServerDto;
 import com.tts.base.service.BaseServerService;
 import com.tts.base.utils.BaseUtilTool;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -14,11 +15,10 @@ import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
 import org.apache.curator.retry.RetryForever;
 import org.apache.zookeeper.CreateMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 
 import java.io.Closeable;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,22 +26,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 用于多个节点进行 master 和 slave 的 选举
+ * 集群中的服务器，用于多个节点进行 master 和 slave 的 选举
  * 在项目启动后开始自动运行
- * <p>
- * 集群中的服务器
- * <p>
- * 注:继承LeaderSelectorListenerAdapter类的目的是:
- * 重写takeLeadership方法，需要时还可重写stateChasnged方法
- * 注:实现Closeable的目的是: 更优雅地关闭释放资源
+ * 注: 继承LeaderSelectorListenerAdapter类的目的是: 重写takeLeadership方法，需要时还可重写stateChasnged方法
+ * 注: 实现Closeable的目的是: 更优雅地关闭释放资源
  *
  * @author FangYuan
  * @since 2022-12-21 20:53:57
  */
+@Slf4j
 public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Closeable {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseWorkServer.class);
-
     private static final BaseWorkServer WORK_SERVER = new BaseWorkServer();
 
     private static final String IP_PORT_KEY = "zookeeper.address";
@@ -57,71 +51,6 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
     private int retryInterval;
     private String masterPath;
 
-    public static void init4Test(String ipPort, int sessionTimeout, int connectTimeout, int retryInterval, String masterPath, String serverIpPath, String serverName) {
-
-        WORK_SERVER.ipPort = ipPort;
-        WORK_SERVER.sessionTimeout = sessionTimeout;
-        WORK_SERVER.connectTimeout = connectTimeout;
-        WORK_SERVER.retryInterval = retryInterval;
-        WORK_SERVER.masterPath = masterPath;
-        WORK_SERVER.serverIpPath = serverIpPath;
-        WORK_SERVER.serverName = serverName;
-        WORK_SERVER.initCurator();
-    }
-
-    /**
-     * 初始化
-     *
-     * @param env
-     * @param baseServerService
-     */
-    public static void init(Environment env, BaseServerService baseServerService) {
-
-        WORK_SERVER.env = env;
-        WORK_SERVER.ipPort = env.getProperty(IP_PORT_KEY);
-        WORK_SERVER.sessionTimeout = Integer.valueOf(env.getProperty(SESSION_TIMEOUT_KEY));
-        WORK_SERVER.connectTimeout = Integer.valueOf(env.getProperty(CONNECT_TIMEOUT_KEY));
-        WORK_SERVER.retryInterval = Integer.valueOf(env.getProperty(RETRY_COUNT_INTERVAL_KEY));
-        WORK_SERVER.masterPath = env.getProperty(PATH_MASTER_SLAVE_KEY);
-        WORK_SERVER.serverIpPath = env.getProperty(SERVER_IP_KEY);
-        WORK_SERVER.serverName = BaseUtilTool.getLocalIpByNetcard();
-
-        WORK_SERVER.baseServerService = baseServerService;
-        WORK_SERVER.initCurator();
-    }
-
-
-    public static void start() {
-        WORK_SERVER.startInner();
-    }
-
-    public static List<String> getServerIpList() {
-        return WORK_SERVER.getServerIpListInner();
-    }
-
-    public static boolean isLeader() {
-        try {
-            return WORK_SERVER.isLeader.get();
-        } catch (Exception e) {
-            log.error("isLeader error ", e);
-            return false;
-        }
-    }
-
-    public static Long getLeaderTime() {
-        return WORK_SERVER.isLeaderTime;
-    }
-
-    public static String getLeaderIp() {
-
-        try {
-            return WORK_SERVER.leaderSelector.getLeader().getId();
-        } catch (Exception e) {
-            log.error("getLeaderIp error ", e);
-            return "";
-        }
-    }
-
     private CuratorFramework client;
 
     private String serverIpPath;
@@ -130,7 +59,6 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
      * 服务器的基本属性，主要用来区分是不同的服务器
      */
     private String serverName;
-
     /**
      * curator提供的监听器
      */
@@ -141,14 +69,12 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
      * 成为leader的时间戳
      */
     private volatile Long isLeaderTime;
-
     /**
      * spring 环境变量
      */
     private Environment env;
-
     /**
-     * 报警中心的 server service
+     * base server service
      */
     private BaseServerService baseServerService;
     /**
@@ -166,15 +92,65 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
     public BaseWorkServer() {
     }
 
-    public static List<BaseServerDto> getServerDtoList() {
-        return WORK_SERVER.getServerDtoListInner();
+    public static void init4Test(String ipPort, int sessionTimeout, int connectTimeout,
+                                 int retryInterval, String masterPath, String serverIpPath, String serverName) {
+
+        WORK_SERVER.ipPort = ipPort;
+        WORK_SERVER.sessionTimeout = sessionTimeout;
+        WORK_SERVER.connectTimeout = connectTimeout;
+        WORK_SERVER.retryInterval = retryInterval;
+        WORK_SERVER.masterPath = masterPath;
+        WORK_SERVER.serverIpPath = serverIpPath;
+        WORK_SERVER.serverName = serverName;
+        WORK_SERVER.initCurator();
+    }
+
+    /**
+     * 初始化
+     */
+    public static void init(Environment env, BaseServerService baseServerService) {
+        WORK_SERVER.env = env;
+        WORK_SERVER.ipPort = env.getProperty(IP_PORT_KEY);
+        WORK_SERVER.sessionTimeout = Integer.parseInt(env.getProperty(SESSION_TIMEOUT_KEY));
+        WORK_SERVER.connectTimeout = Integer.parseInt(env.getProperty(CONNECT_TIMEOUT_KEY));
+        WORK_SERVER.retryInterval = Integer.parseInt(env.getProperty(RETRY_COUNT_INTERVAL_KEY));
+        WORK_SERVER.masterPath = env.getProperty(PATH_MASTER_SLAVE_KEY);
+        WORK_SERVER.serverIpPath = env.getProperty(SERVER_IP_KEY);
+        WORK_SERVER.serverName = BaseUtilTool.getLocalIpByNetcard();
+
+        WORK_SERVER.baseServerService = baseServerService;
+        WORK_SERVER.initCurator();
+    }
+
+    public static boolean isLeader() {
+        try {
+            return WORK_SERVER.isLeader.get();
+        } catch (Exception e) {
+            log.error("isLeader error ", e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取成为Leader的时间戳
+     */
+    public static Long getLeaderTime() {
+        return WORK_SERVER.isLeaderTime;
+    }
+
+    public static String getLeaderIp() {
+        try {
+            return WORK_SERVER.leaderSelector.getLeader().getId();
+        } catch (Exception e) {
+            log.error("getLeaderIp error ", e);
+            return "";
+        }
     }
 
     /**
      * 初始化 curator client
      */
     public void initCurator() {
-
         RetryPolicy retryPolicy = new RetryForever(retryInterval);
 
         WORK_SERVER.baseServerService = baseServerService;
@@ -197,6 +173,9 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
         WORK_SERVER.leaderSelector.autoRequeue();
     }
 
+    public static void start() {
+        WORK_SERVER.startInner();
+    }
 
     /**
      * LeaderSelector提供好了的 竞争群首的方法，直接调用即可
@@ -209,6 +188,44 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
         this.register();
 
         log.info("### BaseWorkServer[" + getServerName() + "] start end !!!");
+    }
+
+    public void register() {
+        log.info("BaseWorkServer[" + getServerName() + "] register thread start !!! ");
+
+        while (true) {
+            try {
+                log.info("BaseWorkServer[" + getServerName() + "] register  start !!! ");
+                ZkConnectionStateListener zkConnectionStateListener =
+                        new ZkConnectionStateListener(serverIpPath, getServerName(), this, baseServerService);
+                client.getConnectionStateListenable().addListener(zkConnectionStateListener);
+
+                // 当前时间字符串
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+                client.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL)
+                        .forPath(serverIpPath + "/" + getServerName(), sdf.format(new Date()).getBytes(StandardCharsets.UTF_8));
+                log.info("BaseWorkServer[" + getServerName() + "] register end !!!");
+                break;
+            } catch (Exception e) {
+                log.error("BaseWorkServer[" + getServerName() + "] register error !!!", e);
+            }
+
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                log.error("BaseWorkServer register sleep error !!!", e);
+            }
+        }
+    }
+
+    /**
+     * 关闭此Server，并从竞争群首组里面移除此Server成员
+     */
+    @Override
+    public void close() {
+        this.stopInner();
+        log.info("BaseWorkServer[" + getServerName() + "] close ！");
     }
 
     public void stopInner() {
@@ -234,51 +251,14 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
         log.info("BaseWorkServer[" + getServerName() + "] stop end !!!");
     }
 
-
-    /**
-     * Shutdown this selector and remove yourself from the leadership group
-     * 关闭此Server，并从竞争群首组里面移除此Server成员
-     */
-    @Override
-    public void close() {
-        this.stopInner();
-        log.info("BaseWorkServer[" + getServerName() + "] close ！");
-    }
-
-    public void register() {
-
-        log.info("BaseWorkServer[" + getServerName() + "] register thread start !!! ");
-
-        while (true) {
-            try {
-                log.info("BaseWorkServer[" + getServerName() + "] register  start !!! ");
-                ZkConnectionStateListener zkConnectionStateListener = new ZkConnectionStateListener(serverIpPath, getServerName(), this, baseServerService);
-                client.getConnectionStateListenable().addListener(zkConnectionStateListener);
-
-                //当前时间字符串
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-                client.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(serverIpPath + "/" + getServerName(), sdf.format(new Date()).getBytes("UTF-8"));
-                log.info("BaseWorkServer[" + getServerName() + "] register end !!!");
-                break;
-            } catch (Exception e) {
-                log.error("BaseWorkServer[" + getServerName() + "] register error !!!", e);
-            }
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                log.error("BaseWorkServer register sleep error !!!", e);
-            }
-        }
+    public static List<String> getServerIpList() {
+        return WORK_SERVER.getServerIpListInner();
     }
 
     /**
      * 获取所有注册的server ip
-     *
-     * @return
      */
     public List<String> getServerIpListInner() {
-
         try {
             if (client != null && client.isStarted()) {
                 return client.getChildren().forPath(serverIpPath);
@@ -290,13 +270,14 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
         }
     }
 
+    public static List<BaseServerDto> getServerDtoList() {
+        return WORK_SERVER.getServerDtoListInner();
+    }
+
     /**
      * 获取所有注册的server信息
-     *
-     * @return
      */
     public List<BaseServerDto> getServerDtoListInner() {
-
         List<String> serverIpList = getServerIpListInner();
 
         List<BaseServerDto> baseServerDtoList = new ArrayList<>();
@@ -328,7 +309,7 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
     }
 
     /**
-     * 当 当前服务器被选中作为群首Leader时，会调用执行此方法！
+     * 当前服务器被选中作为群首Leader时，会调用执行此方法！
      * <p>
      * 注:由于此方法结束后，对应的workerServer就会放弃leader，所以我们不能让此方法马上结束
      *
@@ -337,33 +318,30 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
     @Override
     public void takeLeadership(CuratorFramework client) {
         try {
-
             log.info("BaseWorkServer[" + getServerName() + "] is Leader ！");
             isLeader.set(true);
             isLeaderTime = System.currentTimeMillis();
 
-            //记录成为 leader
+            // 记录成为 leader
             if (baseServerService != null) {
                 baseServerService.saveServerLog(getServerName(), BaseServerStatus.MASTER.getName());
             }
-            //开始监听注册路径下的节点的变化
+            // 开始监听注册路径下的节点的变化
             registerWatcher(serverIpPath);
 
             Thread.currentThread().join();
-
         } catch (Exception e) {
             // 当此方法未运行完就调用了close()方法时，就会触发此异常
             // 记录一下InterruptedException的发生
             log.error("error", e);
             Thread.currentThread().interrupt();
-
         } finally {
             log.info("BaseWorkServer[" + getServerName() + "] is not Leader ！");
             isLeader.set(false);
             isLeaderTime = null;
-            //取消监听
+            // 取消监听
             unregisterWatcher();
-            //记录没有成为leader
+            // 记录没有成为leader
             if (baseServerService != null) {
                 baseServerService.saveServerLog(getServerName(), BaseServerStatus.UNMASTER.getName());
             }
@@ -372,11 +350,8 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
 
     /**
      * 注册路径子节点的监听器
-     *
-     * @param path
      */
     private void registerWatcher(String path) {
-
         if (treeCacheListener != null) {
             unregisterWatcher();
         }
