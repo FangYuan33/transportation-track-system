@@ -94,7 +94,6 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
 
     public static void init4Test(String ipPort, int sessionTimeout, int connectTimeout,
                                  int retryInterval, String masterPath, String serverIpPath, String serverName) {
-
         WORK_SERVER.ipPort = ipPort;
         WORK_SERVER.sessionTimeout = sessionTimeout;
         WORK_SERVER.connectTimeout = connectTimeout;
@@ -381,5 +380,4 @@ public class BaseWorkServer extends LeaderSelectorListenerAdapter implements Clo
     public LeaderSelector getLeaderSelector() {
         return leaderSelector;
     }
-
 }
