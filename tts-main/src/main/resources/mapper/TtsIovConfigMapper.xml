@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tts.main.dao.TtsIovConfigMapper">
+
+    <select id="selectByQueryCondition" parameterType="com.jd.jcloud.tts.domain.TtsIovConfig" resultType="com.jd.jcloud.tts.domain.TtsIovConfig">
+        SELECT id
+               ,carrier_code
+               ,iov_type
+               ,config
+               ,subscribe_interval
+               ,time_near_by
+               ,log_flag
+               ,update_time
+        FROM tts_iov_config  tic
+        <where>
+            <if test="carrierCode != null and carrierCode != '' ">
+                AND carrier_code = #{carrierCode}
+            </if>
+            <if test="iovType != null and iovType != '' ">
+                AND iov_type = #{iovType}
+            </if>
+        </where>
+    </select>
+
+</mapper>

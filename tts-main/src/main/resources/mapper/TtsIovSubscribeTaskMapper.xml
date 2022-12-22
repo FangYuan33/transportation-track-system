@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tts.main.dao.TtsIovSubscribeTaskMapper">
+
+    <select id="selectByQueryCondition" parameterType="com.tts.main.domain.TtsIovSubscribeTask"
+                                        resultType="com.tts.main.domain.TtsIovSubscribeTask">
+        SELECT id
+        ,iov_config_id
+        ,server_ip
+        ,state
+        ,create_time
+        ,update_time
+        FROM tts_iov_subscribe_task tist
+        <where>
+            <if test=" iovConfigId != null">
+                AND iov_config_id = #{iovConfigId}
+            </if>
+            <if test=" serverIp != null and serverIp != ''">
+                AND server_ip = #{serverIp}
+            </if>
+            <if test=" state != null" >
+                AND state = #{state}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectServerIpInRunningState" resultType="java.lang.String">
+        SELECT  server_ip
+          FROM  tts_iov_subscribe_task tist
+         WHERE  tist.state = 1 or tist.state = 2
+      GROUP BY  tist.server_ip
+   </select>
+
+</mapper>
