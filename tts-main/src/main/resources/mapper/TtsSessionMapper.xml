@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tts.main.dao.TtsSessionMapper">
+     <resultMap id="TtsSessionResultMap" type="com.tts.main.domain.TtsSession" >
+          <id property="sessionId" column="session_id" />
+          <result property="tenantId" column="tenant_id"/>
+          <result property="phoneModel" column="phone_model"/>
+          <result property="phoneSystem" column="phone_system"/>
+          <result property="telecomCarrier" column="telecom_carrier"/>
+          <result property="network" column="network"/>
+          <result property="appName" column="app_name"/>
+          <result property="appVersion" column="app_version"/>
+          <result property="deviceUuid" column="device_uuid"/>
+          <result property="driverId" column="driver_id"/>
+          <result property="orderId" column="order_id"/>
+          <result property="vehicleId" column="vehicle_id"/>
+          <result property="shipmentIdArray" column="shipment_id_array"/>
+          <result property="token" column="token"/>
+          <result property="uploadTime" column="upload_time"/>
+          <result property="createTime" column="create_time"/>
+     </resultMap>
+     <sql id="selectSessionVo">
+         SELECT  tc.session_id, tc.tenant_id, tc.phone_model, tc.phone_system, tc.telecom_carrier, tc.network, tc.app_name, tc.app_version,tc.device_uuid,
+                tc.driver_id, tc.order_id,tc.vehicle_id,tc.shipment_id_array,tc.token,tc.upload_time,tc.create_time
+           FROM tts_session tc
+     </sql>
+     <!--全部查询-->
+     <select id="selectTtsSessionList" parameterType="com.tts.main.domain.TtsSession" resultMap="TtsSessionResultMap">
+          <include refid="selectSessionVo"/>
+          <where>
+          <if test="tenantId != null and tenantId != ''">
+               AND tc.tenant_id = #{tenantId}
+          </if>
+          <if test="vehicleId != null and vehicleId != ''">
+               AND tc.vehicle_id = #{vehicleId}
+          </if>
+          <if test="sessionId != null and sessionId != ''">
+               AND tc.session_id = #{sessionId}
+          </if>
+          <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+               and  tc.create_time &gt;=   #{params.beginTime}
+          </if>
+          <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+               and  tc.create_time  &lt;=  #{params.endTime}
+          </if>
+          </where>
+     </select>
+
+     <select id="querySessionByVehicleIdAndTime" parameterType="com.tts.remote.dto.TtsSessionDto"
+             resultType="com.tts.remote.dto.TtsSessionDto">
+          <include refid="selectSessionVo"/>
+          <where>
+               <if test="vehicleId != null and vehicleId != ''">
+                    AND tc.vehicle_id = #{vehicleId}
+               </if>
+               <if test="stratTime != null"><!-- 开始时间检索 -->
+                    and  tc.create_time &gt;=   #{stratTime}
+               </if>
+               <if test="endTime != null"><!-- 结束时间检索 -->
+                    and  tc.create_time  &lt;=  #{endTime}
+               </if>
+          </where>
+          ORDER BY create_time LIMIT 100
+     </select>
+
+</mapper>

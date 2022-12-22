@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tts.main.dao.TtsCoordinateCalMapper">
+    <resultMap id="TtsCoordinateCalResultMap" type="com.tts.main.domain.TtsCoordinateCal" >
+        <id property="id" column="id" />
+        <id property="flowRecordId" column="flow_Record_Id" />
+        <id property="tenantId" column="tenant_Id" />
+        <id property="vehicleId" column="vehicle_Id" />
+        <id property="shipmentId" column="shipment_Id" />
+        <id property="longitude" column="longitude" />
+        <id property="latitude" column="latitude" />
+        <id property="receiverServerTime" column="receiver_Server_Time" />
+        <id property="currentDistance" column="current_Distance" />
+        <id property="wholeDistance" column="whole_Distance" />
+        <id property="currentDuration" column="current_Duration" />
+        <id property="wholeDuration" column="whole_Duration" />
+        <id property="currentSpeed" column="current_Speed" />
+        <id property="wholeSpeed" column="whole_Speed" />
+        <id property="calTime" column="cal_time" />
+    </resultMap>
+    <sql id="selectTtsCoordinateCalVo">
+        select id, flow_Record_Id, tenant_Id, vehicle_Id, shipment_Id, longitude, latitude, receiver_Server_Time, current_Distance, whole_Distance, current_Duration, whole_Duration, current_Speed, whole_Speed, cal_time, is_Cal from tts_coordinate_cal
+    </sql>
+
+    <select id="selectTtsCoordinateCalList" parameterType="com.tts.main.domain.TtsCoordinateCal" resultMap="TtsCoordinateCalResultMap">
+        <include refid="selectTtsCoordinateCalVo"/>
+        <where>
+            <if test="tenantId != null ">
+            and tenant_Id = #{tenantId}
+            </if>
+            <if test="vehicleId != null ">
+             and vehicle_Id = #{vehicleId}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                and  receiver_Server_Time &gt;=   #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                and  receiver_Server_Time  &lt;=  #{params.endTime}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

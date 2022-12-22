@@ -23,6 +23,7 @@
         <curator.version>2.13.0</curator.version>
         <dubbo.version>2.7.8</dubbo.version>
         <servlet.version>4.0.1</servlet.version>
+        <redisson.version>3.13.6</redisson.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
@@ -114,6 +115,13 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${servlet.version}</version>
+            </dependency>
+
+            <!-- redisson -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

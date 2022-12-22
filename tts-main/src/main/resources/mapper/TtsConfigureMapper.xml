@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tts.main.dao.TtsConfigureMapper">
+     <resultMap id="TtsConfigureResultMap" type="com.tts.main.domain.TtsConfigure" >
+          <id property="id" column="id" />
+          <result property="tenantId" column="tenant_id"/>
+          <result property="filterSwitch" column="filter_switch"/>
+          <result property="locationTypeFilter" column="location_type_filter"/>
+          <result property="accuracyFilterThreshold" column="accuracy_filter_threshold"/>
+          <result property="redisSwitch" column="redis_switch"/>
+          <result property="redisExpiryHour" column="redis_expiry_hour"/>
+          <result property="mileageComputeSwitch" column="mileage_compute_switch"/>
+          <result property="geofenceMonitorSwitch" column="geofence_monitor_switch"/>
+          <result property="geofenceMonitorNotifySwitch" column="geofence_monitor_notify_switch"/>
+         <result property="updateBy" column="update_by"/>
+          <result property="updateTime" column="update_time"/>
+     </resultMap>
+
+     <sql id="selectConfigureVo">
+         SELECT  tc.id,
+                 tc.tenant_id,
+                 tc.filter_switch,
+                 tc.location_type_filter,
+                 tc.accuracy_filter_threshold,
+                 tc.redis_switch,
+                 tc.redis_expiry_hour,
+                 tc.mileage_compute_switch,
+                 tc.geofence_monitor_switch,
+                 tc.geofence_monitor_notify_switch,
+                 tc.update_by,
+                 tc.update_time
+           FROM tts_configure tc
+     </sql>
+
+    <!--全部查询-->
+     <select id="selectConditionList" parameterType="com.tts.main.domain.TtsConfigure" resultMap="TtsConfigureResultMap">
+          <include refid="selectConfigureVo"/>
+          <where>
+               <if test="tenantId != null and tenantId != ''">
+                 tc.tenant_id = #{tenantId}
+               </if>
+              <if test="geofenceMonitorSwitch != null and geofenceMonitorSwitch != ''">
+                 AND  tc.geofence_monitor_switch = #{geofenceMonitorSwitch}
+              </if>
+              <if test="geofenceMonitorNotifySwitch != null and geofenceMonitorNotifySwitch != ''">
+                 AND  tc.geofence_monitor_notify_switch = #{geofenceMonitorNotifySwitch}
+              </if>
+          </where>
+     </select>
+
+    <!-- 通过租户id删除配置信息,注意租户id不能为-1 -->
+    <delete id="deleteByTenantId" parameterType="long">
+          DELETE FROM tts_configure tc
+                WHERE tc.tenant_id =  #{tenantId}
+                 AND  tc.tenant_id != -1;
+    </delete>
+
+</mapper>

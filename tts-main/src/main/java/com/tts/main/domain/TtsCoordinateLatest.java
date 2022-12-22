@@ -1,6 +1,7 @@
 package com.tts.main.domain;
 
 import com.tts.framework.common.domain.SimpleBaseEntity;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
  * @author FangYuan
  * @since 2022-12-22 17:32:06
  */
+@Data
 public class TtsCoordinateLatest extends SimpleBaseEntity {
 
     /**

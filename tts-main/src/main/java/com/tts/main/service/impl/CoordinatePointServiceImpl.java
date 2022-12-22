@@ -1,9 +1,24 @@
 package com.tts.main.service.impl;
 
+import com.tts.base.constant.TtsConstant;
+import com.tts.framework.cache.redis.RedisClient;
+import com.tts.framework.cache.redis.operator.RedisClientQueueOperator;
+import com.tts.main.dao.TtsCoordinateCalMapper;
+import com.tts.main.dao.TtsCoordinateLatestMapper;
+import com.tts.main.dao.TtsCoordinatePointMapper;
+import com.tts.main.dao.TtsSessionMapper;
+import com.tts.main.domain.TtsConfigure;
+import com.tts.main.domain.TtsCoordinateLatest;
+import com.tts.main.domain.TtsCoordinatePoint;
+import com.tts.main.domain.TtsSession;
+import com.tts.main.dto.CoordinatePointDto4RedisQueue;
+import com.tts.main.service.ConfigureService;
 import com.tts.main.service.CoordinatePointService;
+import com.tts.main.service.ITtsGlobalConfigureService;
+import com.tts.main.utils.ConvertTool;
+import com.tts.remote.app.dto.AppCoordinatePointDto;
+import com.tts.remote.dto.CoordinateQueryDto;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +41,11 @@ public class CoordinatePointServiceImpl implements CoordinatePointService {
     @Autowired
     private TtsSessionMapper ttsSessionMapper;
 
-    /**
-     * mybatis dao
-     */
     @Autowired
     private TtsCoordinatePointMapper ttsCoordinatePointMapper;
 
     @Autowired
     private ConfigureService configureService;
-
-    @Autowired
-    private GeofenceMonitorService geofenceMonitorService;
 
     @Autowired
     private TtsCoordinateCalMapper ttsCoordinateCalMapper;
@@ -578,9 +587,6 @@ public class CoordinatePointServiceImpl implements CoordinatePointService {
                 return;
             }
         }
-
-        //处理坐标电子围栏的自动监控
-        this.geofenceMonitorService.dealGeofenceMonitor(coordinatePointDto4RedisQueue.getVehicleId(), preCoordinatePointDto4RedisLatest, currentCoordinatePointDto4RedisLatest, ttsConfigure);
 
         //更新redis
         lastestPointRedisOperator.set(TtsConstant.REDIS_NAMESPACE, redisKey, currentCoordinatePointDto4RedisLatest, ttsConfigure.getRedisExpiryHour(), TimeUnit.HOURS);
