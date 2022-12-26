@@ -19,7 +19,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.tts.common.constant.Constants;
 import com.tts.common.utils.StringUtils;
 
 /**
@@ -51,7 +50,7 @@ public class HttpUtils
      */
     public static String sendGet(String url, String param)
     {
-        return sendGet(url, param, Constants.UTF8);
+        return sendGet(url, param, StandardCharsets.UTF_8.name());
     }
 
     /**

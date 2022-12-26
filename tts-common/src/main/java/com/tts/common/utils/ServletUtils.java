@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.tts.common.constant.Constants;
 import com.tts.common.core.text.Convert;
 
 /**
@@ -190,7 +190,7 @@ public class ServletUtils
     {
         try
         {
-            return URLEncoder.encode(str, Constants.UTF8);
+            return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
         }
         catch (UnsupportedEncodingException e)
         {
@@ -208,7 +208,7 @@ public class ServletUtils
     {
         try
         {
-            return URLDecoder.decode(str, Constants.UTF8);
+            return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
         }
         catch (UnsupportedEncodingException e)
         {
