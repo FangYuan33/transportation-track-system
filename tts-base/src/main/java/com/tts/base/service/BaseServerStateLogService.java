@@ -5,4 +5,5 @@ import com.tts.base.domain.BaseServerStateLog;
 
 public interface BaseServerStateLogService extends IService<BaseServerStateLog> {
 
+    void saveNewState(String serviceName, String state);
 }

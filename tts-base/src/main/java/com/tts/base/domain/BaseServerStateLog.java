@@ -3,6 +3,7 @@ package com.tts.base.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  * @since 2022-12-29 16:38:15
  */
 @Data
+@Accessors(chain = true)
 public class BaseServerStateLog {
 
     @TableId(type = IdType.AUTO)

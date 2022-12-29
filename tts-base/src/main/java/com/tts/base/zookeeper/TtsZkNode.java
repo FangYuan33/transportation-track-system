@@ -1,6 +1,6 @@
 package com.tts.base.zookeeper;
 
-import com.tts.base.domain.BaseServerStateLog;
+import com.tts.base.enums.ServerState;
 import com.tts.base.properties.ZkNodeProperties;
 import com.tts.base.service.BaseServerStateLogService;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +98,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             isLeaderTime = LocalDateTime.now();
 
             // 记录成为Leader的日志
-            baseServerStateLogService.save(new BaseServerStateLog());
+            baseServerStateLogService.saveNewState(nodeProperties.getServiceName(), ServerState.MASTER.getName());
 
             // 注册路径子节点监听器
 
@@ -115,6 +115,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             // 取消监听器
 
             // 记录没有成为Leader的日志
+            baseServerStateLogService.saveNewState(nodeProperties.getServiceName(), ServerState.UN_MASTER.getName());
         }
     }
 
