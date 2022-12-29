@@ -2,13 +2,12 @@
 
 ## 1. TTS组件MAVEN依赖图
 
-![](images/tts依赖关系.jpg)
+![](images/新tts依赖关系.jpg)
 
-其中 `tcsp-component-tts` 为轨迹服务核心模块，其中图示下方为通用依赖
-
-- `tcsp-framewoek`: 框架核心，通用的工具类、AOP、注解、配置类等
-- `tcsp-component-base`: 基础数据DAO、Service实现
-- `tcsp-tools-gps`: 主要是经纬度不同坐标系转化工具类
+- `tts-start`: 轨迹服务启动模块，包含启动类和一些必要的ApplicationRunner
+- `tts-base`: 轨迹服务基础功能、组件模块，包含节点实现类和一些基础服务
+- `tts-framework`: 框架支持，包含一些配置
+- `tts-common`: 通用的枚举和工具类等...
 
 其中图示上方为轨迹业务不同的实现，分别放在了不同的module里
 
@@ -23,7 +22,17 @@
 问题
 
 ## 2. TTS服务
-### 2.1 节点类型及其作用
+### 2.1 TTS节点
+#### 2.1.1 实现原理
+![](images/TTS组件实现原理类图.jpg)
+
+- **LeaderSelectorListenerAdapter**: 实现节点的选举，分出Leader和Follower节点负责不同的职责
+- **InitializingBean**: 初始化节点中的必要信息
+- **Closeable**: 为了调用`close()`方法优雅的释放资源
+
+`TtsNodeRunner`实现`ApplicationRunner`随服务启动，调用节点的启动方法，让zookeeper帮忙分配角色
+
+#### 2.1.2 类型及其职责
 
 - **Leader**: 负责分配任务和检查从节点任务的心跳状态
 - **Follower**: 执行任务和更新任务的状态
