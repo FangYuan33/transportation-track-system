@@ -1,4 +1,4 @@
-package com.tts.base.application;
+package com.tts.runner;
 
 import com.tts.base.zookeeper.TtsZkNode;
 import lombok.extern.slf4j.Slf4j;

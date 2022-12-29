@@ -1,4 +1,4 @@
-package com.tts.base.zookeeper.properties;
+package com.tts.base.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

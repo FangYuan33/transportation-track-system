@@ -1,10 +1,8 @@
 package com.tts;
 
-import com.tts.base.zookeeper.properties.ZkNodeProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * 启动程序
