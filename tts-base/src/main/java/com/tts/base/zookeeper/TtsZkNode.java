@@ -43,6 +43,11 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     @Autowired
     private BaseServerStateLogService baseServerStateLogService;
 
+    /**
+     * 节点服务名称
+     */
+    private String serviceName;
+
     private CuratorFramework curatorFramework;
     /**
      * 监听器
@@ -57,10 +62,6 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      * 是否是Leader的标志位
      */
     private volatile AtomicBoolean isLeader;
-    /**
-     * 成为Leader的时间点
-     */
-    private volatile LocalDateTime isLeaderTime;
 
     @Override
     public void afterPropertiesSet() {
@@ -73,6 +74,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
         // 标记为普通节点
         isLeader = new AtomicBoolean(false);
+        serviceName = nodeProperties.getServiceName();
 
         /*
          当节点执行完takeLeadership()方法时，它会放弃Leader的身份
@@ -92,13 +94,12 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     @Override
     public void takeLeadership(CuratorFramework curatorFramework) {
         try {
-            log.info("TTS Node {} is Leader!", nodeProperties.getServiceName());
+            log.info("TTS Node {} is Leader!", serviceName);
 
             isLeader.set(true);
-            isLeaderTime = LocalDateTime.now();
 
             // 记录成为Leader的日志
-            baseServerStateLogService.saveNewState(nodeProperties.getServiceName(), ServerState.MASTER.getName());
+            baseServerStateLogService.saveNewState(serviceName, ServerState.MASTER.getName());
 
             // 注册路径子节点监听器
 
@@ -108,14 +109,13 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
             Thread.currentThread().interrupt();
         } finally {
-            log.info("TTS Node {} isn't Leader!", nodeProperties.getServiceName());
+            log.info("TTS Node {} isn't Leader!", serviceName);
 
             isLeader.set(false);
-            isLeaderTime = null;
             // 取消监听器
 
             // 记录没有成为Leader的日志
-            baseServerStateLogService.saveNewState(nodeProperties.getServiceName(), ServerState.UN_MASTER.getName());
+            baseServerStateLogService.saveNewState(serviceName, ServerState.UN_MASTER.getName());
         }
     }
 
@@ -123,13 +123,13 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      * TTS 节点启动方法
      */
     public void start() {
-        log.info("TTS Node {} start!!!", nodeProperties.getServiceName());
+        log.info("TTS Node {} start!!!", serviceName);
 
         curatorFramework.start();
         leaderSelector.start();
         registerAndCreate();
 
-        log.info("TTS Node {} start over!!!", nodeProperties.getServiceName());
+        log.info("TTS Node {} start over!!!", serviceName);
     }
 
     /**
@@ -138,7 +138,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     private void registerAndCreate() {
         while (true) {
             try {
-                log.info("TTS Node {} register!!!", nodeProperties.getServiceName());
+                log.info("TTS Node {} register!!!", serviceName);
 
                 // 添加链接状态监听器
                 curatorFramework.getConnectionStateListenable().addListener(connectionStateListener);
@@ -147,24 +147,24 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
                         .withMode(CreateMode.EPHEMERAL)
                         .forPath(nodeProperties.getTreePath(), LocalDateTime.now().toString().getBytes(StandardCharsets.UTF_8));
 
-                log.info("TTS Node {} register over!!!", nodeProperties.getServiceName());
+                log.info("TTS Node {} register over!!!", serviceName);
                 break;
             } catch (Exception e) {
-                log.error("TTS Node " + nodeProperties.getServiceName() + " register!!!", e);
+                log.error("TTS Node " + serviceName + " register!!!", e);
             }
 
             // 休息一秒后重试
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                log.error("TTS Node " + nodeProperties.getServiceName() + " sleep error!!!", e);
+                log.error("TTS Node " + serviceName + " sleep error!!!", e);
             }
         }
     }
 
     @Override
     public void close() {
-        log.info("TTS Node {} close!!!", nodeProperties.getServiceName());
+        log.info("TTS Node {} close!!!", serviceName);
 
         try {
             treeCache.close();
@@ -187,7 +187,10 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             log.error("Close CuratorFramework Error", e);
         }
 
-        log.info("TTS Node {} close over!!!", nodeProperties.getServiceName());
+        log.info("TTS Node {} close over!!!", serviceName);
     }
 
+    public String getServiceName() {
+        return serviceName;
+    }
 }

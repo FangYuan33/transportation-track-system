@@ -1,5 +1,6 @@
 package com.tts.base.zookeeper;
 
+import com.tts.base.service.BaseServerStateLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
@@ -16,12 +17,15 @@ public class ZkConnectionStateListener implements ConnectionStateListener {
 
     @Autowired
     private TtsZkNode ttsZkNode;
+    @Autowired
+    private BaseServerStateLogService baseServerStateLogService;
 
     @Override
     public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
         log.info("TTS Node state has changed: {}", connectionState.toString());
 
         // 日志记录节点变化
+        baseServerStateLogService.saveNewState(ttsZkNode.getServiceName(), connectionState.name());
 
         // SUSPENDED重试链接
         if (ConnectionState.SUSPENDED.equals(connectionState)) {
