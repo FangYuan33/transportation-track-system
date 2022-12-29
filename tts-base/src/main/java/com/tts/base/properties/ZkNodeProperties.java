@@ -40,7 +40,7 @@ public class ZkNodeProperties {
     private String masterPath;
 
     /**
-     * 节点路径
+     * 节点路径，用于监听该路径上的事件
      */
     private String treePath;
 }

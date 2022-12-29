@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
 import org.apache.curator.retry.RetryForever;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,6 +59,10 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      * 节点监听器
      */
     private TreeCache treeCache;
+    /**
+     * 用于Leader节点的监听器
+     */
+    private volatile TreeCacheListener treeCacheListener;
 
     /**
      * 是否是Leader的标志位
@@ -101,7 +107,16 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             // 记录成为Leader的日志
             baseServerStateLogService.saveNewState(serviceName, ServerState.MASTER.getName());
 
+            // 创建容器节点路径，这个treePath不存在不行
+            Stat treePathStat = curatorFramework.checkExists().forPath(nodeProperties.getTreePath());
+            if (treePathStat == null) {
+                curatorFramework.create().creatingParentContainersIfNeeded()
+                        .withMode(CreateMode.EPHEMERAL)
+                        .forPath(nodeProperties.getTreePath(), LocalDateTime.now().toString().getBytes(StandardCharsets.UTF_8));
+            }
+
             // 注册路径子节点监听器
+            registerPathWatcher();
 
             Thread.currentThread().join();
         } catch (Exception e) {
@@ -113,9 +128,39 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
             isLeader.set(false);
             // 取消监听器
+            unregisterPathWatcher();
 
             // 记录没有成为Leader的日志
             baseServerStateLogService.saveNewState(serviceName, ServerState.UN_MASTER.getName());
+        }
+    }
+
+    /**
+     * 注册路径子节点监听器
+     */
+    private void registerPathWatcher() {
+        // 如果有了监听器先移除在重新添加注册
+        if (treeCacheListener != null) {
+            unregisterPathWatcher();
+        }
+
+        // 添加监听器
+        this.treeCacheListener = new ZkTreeCacheListener(baseServerStateLogService, serviceName);
+        treeCache.getListenable().addListener(treeCacheListener);
+
+        try {
+            treeCache.start();
+        } catch (Exception e) {
+            log.error("Start TreeCache Error", e);
+        }
+    }
+
+    /**
+     * 反注册该节点监听器
+     */
+    private void unregisterPathWatcher() {
+        if (treeCacheListener != null) {
+            treeCache.getListenable().removeListener(treeCacheListener);
         }
     }
 
@@ -127,25 +172,21 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
         curatorFramework.start();
         leaderSelector.start();
-        registerAndCreate();
+        registerConnectionListener();
 
         log.info("TTS Node {} start over!!!", serviceName);
     }
 
     /**
-     * 注册链接监听器和创建容器节点
+     * 注册链接监听器
      */
-    private void registerAndCreate() {
+    private void registerConnectionListener() {
         while (true) {
             try {
                 log.info("TTS Node {} register!!!", serviceName);
 
                 // 添加链接状态监听器
                 curatorFramework.getConnectionStateListenable().addListener(connectionStateListener);
-                // 创建容器节点
-                curatorFramework.create().creatingParentContainersIfNeeded()
-                        .withMode(CreateMode.EPHEMERAL)
-                        .forPath(nodeProperties.getTreePath(), LocalDateTime.now().toString().getBytes(StandardCharsets.UTF_8));
 
                 log.info("TTS Node {} register over!!!", serviceName);
                 break;
