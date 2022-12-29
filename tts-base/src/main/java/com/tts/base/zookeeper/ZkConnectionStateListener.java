@@ -29,6 +29,8 @@ public class ZkConnectionStateListener implements ConnectionStateListener {
 
             // 先关闭再试试启动
             ttsZkNode.close();
+
+            ttsZkNode.afterPropertiesSet();
             ttsZkNode.start();
         }
         // 丢失则结束该节点的生命

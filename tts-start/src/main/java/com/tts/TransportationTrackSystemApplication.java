@@ -1,5 +1,6 @@
 package com.tts;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 /**
  * 启动程序
  */
+@MapperScan(basePackages = "com.tts.base.dao")
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class TransportationTrackSystemApplication {
     public static void main(String[] args) {

@@ -1,6 +1,8 @@
 package com.tts.base.zookeeper;
 
+import com.tts.base.domain.BaseServerStateLog;
 import com.tts.base.properties.ZkNodeProperties;
+import com.tts.base.service.BaseServerStateLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -38,6 +40,8 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      */
     @Autowired
     private ZkConnectionStateListener connectionStateListener;
+    @Autowired
+    private BaseServerStateLogService baseServerStateLogService;
 
     private CuratorFramework curatorFramework;
     /**
@@ -94,7 +98,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             isLeaderTime = LocalDateTime.now();
 
             // 记录成为Leader的日志
-            log.info("记录Leader日志");
+            baseServerStateLogService.save(new BaseServerStateLog());
 
             // 注册路径子节点监听器
 
