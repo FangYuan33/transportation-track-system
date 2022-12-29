@@ -67,6 +67,7 @@ mybatis:
 
 # zookeeper配置
 zookeeper:
+  serviceName: ${spring.application.name}
   address: 101.43.163.223:2181
   sessionTimeout: 10000
   connectTimeout: 20000

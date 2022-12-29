@@ -9,7 +9,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 /**
  * 启动程序
  */
-@EnableConfigurationProperties(ZkNodeProperties.class)
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class TransportationTrackSystemApplication {
     public static void main(String[] args) {
