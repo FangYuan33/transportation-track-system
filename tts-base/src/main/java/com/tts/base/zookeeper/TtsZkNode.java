@@ -231,6 +231,13 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         log.info("TTS Node {} close over!!!", serviceName);
     }
 
+    /**
+     * 判断该节点是不是Leader
+     */
+    public AtomicBoolean getIsLeader() {
+        return isLeader;
+    }
+
     public String getServiceName() {
         return serviceName;
     }
