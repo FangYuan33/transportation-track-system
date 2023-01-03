@@ -3,6 +3,8 @@ package com.tts.base.domain;
 import com.tts.common.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -12,9 +14,16 @@ import java.time.LocalDateTime;
  * @author FangYuan
  * @since 2023-01-03 19:44:10
  */
+@NoArgsConstructor
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BaseNodeHeartbeat extends BaseEntity {
+
+    public BaseNodeHeartbeat(String serviceName, LocalDateTime latestHeartBeatTime) {
+        this.serviceName = serviceName;
+        this.latestHeartBeatTime = latestHeartBeatTime;
+    }
 
     /**
      * 服务名称

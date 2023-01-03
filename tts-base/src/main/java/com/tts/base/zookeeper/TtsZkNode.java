@@ -1,8 +1,9 @@
 package com.tts.base.zookeeper;
 
 import com.tts.base.enums.ServerState;
-import com.tts.base.properties.ZkNodeProperties;
+import com.tts.base.properties.ZkProperties;
 import com.tts.base.service.BaseServerStateLogService;
+import com.tts.common.utils.ip.IpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -12,6 +13,7 @@ import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
 import org.apache.curator.retry.RetryForever;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.common.Time;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeable, InitializingBean {
 
     @Autowired
-    private ZkNodeProperties nodeProperties;
+    private ZkProperties nodeProperties;
     /**
      * 链接状态监听器
      */
@@ -80,7 +82,8 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
         // 标记为普通节点
         isLeader = new AtomicBoolean(false);
-        serviceName = nodeProperties.getServiceName();
+        // 服务节点名: IP:currentTime
+        serviceName = IpUtils.getHostIp() + ":" + Time.currentElapsedTime();
 
         /*
          当节点执行完takeLeadership()方法时，它会放弃Leader的身份

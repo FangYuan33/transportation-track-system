@@ -69,6 +69,8 @@ zookeeper:
   retryCountInterval: 500
   masterPath: /tts/server/master
   treePath: /tts/server/tree
+  node:
+    heartbeatInterval: 1000
 
 # Swagger配置
 swagger:

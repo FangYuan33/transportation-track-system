@@ -7,12 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "zookeeper")
-public class ZkNodeProperties {
-
-    /**
-     * 服务名称
-     */
-    private String serviceName;
+public class ZkProperties {
 
     /**
      * ip:port

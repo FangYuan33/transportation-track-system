@@ -10,4 +10,8 @@ import org.springframework.stereotype.Service;
 public class BaseNodeHeartbeatLogImpl extends ServiceImpl<BaseNodeHeartbeatLogMapper, BaseNodeHeartbeatLog>
         implements BaseNodeHeartbeatLogService {
 
+    @Override
+    public void appendHeartbeatLog(String serviceName) {
+        baseMapper.insert(new BaseNodeHeartbeatLog(serviceName));
+    }
 }
