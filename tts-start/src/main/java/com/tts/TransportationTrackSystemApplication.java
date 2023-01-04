@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 /**
  * 启动程序
  */
-@MapperScan(basePackages = "com.tts.base.dao")
+@MapperScan(basePackages = {"com.tts.base.dao", "com.tts.iov.dao"})
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class TransportationTrackSystemApplication {
     public static void main(String[] args) {
