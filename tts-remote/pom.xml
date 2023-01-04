@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tts-iov</artifactId>
+    <artifactId>tts-remote</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -17,15 +17,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.tts</groupId>
-            <artifactId>tts-node</artifactId>
-            <version>${tts.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>com.tts</groupId>
-            <artifactId>tts-remote</artifactId>
-        </dependency>
     </dependencies>
 </project>

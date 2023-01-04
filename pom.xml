@@ -113,6 +113,13 @@
                 <version>${tts.version}</version>
             </dependency>
 
+            <!-- remote模块 -->
+            <dependency>
+                <groupId>com.tts</groupId>
+                <artifactId>tts-remote</artifactId>
+                <version>${tts.version}</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -159,6 +166,7 @@
         <module>tts-common</module>
         <module>tts-node</module>
         <module>tts-iov</module>
+        <module>tts-remote</module>
     </modules>
     <packaging>pom</packaging>
 
