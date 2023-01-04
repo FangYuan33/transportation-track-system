@@ -109,7 +109,7 @@
             <!-- 基础模块 -->
             <dependency>
                 <groupId>com.tts</groupId>
-                <artifactId>tts-base</artifactId>
+                <artifactId>tts-node</artifactId>
                 <version>${tts.version}</version>
             </dependency>
 
@@ -157,7 +157,7 @@
         <module>tts-start</module>
         <module>tts-framework</module>
         <module>tts-common</module>
-        <module>tts-base</module>
+        <module>tts-node</module>
     </modules>
     <packaging>pom</packaging>
 

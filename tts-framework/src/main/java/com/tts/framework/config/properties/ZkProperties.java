@@ -1,4 +1,4 @@
-package com.tts.base.properties;
+package com.tts.framework.config.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

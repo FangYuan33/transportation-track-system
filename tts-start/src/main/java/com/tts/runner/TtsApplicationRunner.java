@@ -1,7 +1,9 @@
 package com.tts.runner;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 /**
  * TTS应用功能服务
@@ -9,6 +11,8 @@ import org.springframework.boot.ApplicationRunner;
  * @author FangYuan
  * @since 2022-12-29 20:57:46
  */
+@Slf4j
+@Component
 public class TtsApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {

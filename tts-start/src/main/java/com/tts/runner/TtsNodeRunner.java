@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * TTS节点启动类，随系统启动
+ * 1. 启动节点
+ * 2. 记录节点心跳
  *
  * @author wangyilong13
  * @since 2022-12-29 15:13:48

@@ -1,7 +1,7 @@
 package com.tts.base.zookeeper;
 
 import com.tts.base.enums.ServerState;
-import com.tts.base.properties.ZkProperties;
+import com.tts.framework.config.properties.ZkProperties;
 import com.tts.base.service.BaseServerStateLogService;
 import com.tts.common.utils.ip.IpUtils;
 import lombok.extern.slf4j.Slf4j;

@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
-    <artifactId>tts-base</artifactId>
+    <artifactId>tts-node</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
