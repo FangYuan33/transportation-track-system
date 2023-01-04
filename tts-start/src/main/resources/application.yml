@@ -72,6 +72,18 @@ zookeeper:
     # 节点心跳记录间隔
     heartbeatInterval: 10000
 
+dubbo:
+  application:
+    name: tts-dubbo-provider
+  protocol:
+    name: dubbo
+    port: 20800
+  registry:
+    id: tts-zk-registry
+    address: zookeeper://101.43.163.223:2181
+  consumer:
+    check: false
+
 # Swagger配置
 swagger:
   # 是否开启swagger
