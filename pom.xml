@@ -106,10 +106,10 @@
                 <version>${tts.version}</version>
             </dependency>
 
-            <!-- 基础模块 -->
+            <!-- iov模块 -->
             <dependency>
                 <groupId>com.tts</groupId>
-                <artifactId>tts-node</artifactId>
+                <artifactId>tts-iov</artifactId>
                 <version>${tts.version}</version>
             </dependency>
 
@@ -158,13 +158,9 @@
         <module>tts-framework</module>
         <module>tts-common</module>
         <module>tts-node</module>
+        <module>tts-iov</module>
     </modules>
     <packaging>pom</packaging>
-
-
-    <dependencies>
-
-    </dependencies>
 
     <build>
         <plugins>

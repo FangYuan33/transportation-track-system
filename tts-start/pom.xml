@@ -33,7 +33,7 @@
         <!-- 基础模块-->
         <dependency>
             <groupId>com.tts</groupId>
-            <artifactId>tts-node</artifactId>
+            <artifactId>tts-iov</artifactId>
         </dependency>
 
     </dependencies>
