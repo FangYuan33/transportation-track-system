@@ -1,6 +1,8 @@
 package com.tts.runner;
 
+import com.tts.iov.service.IovConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -14,10 +16,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class TtsApplicationRunner implements ApplicationRunner {
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        // 解密iov配置信息
 
+    @Autowired
+    private IovConfigService iovConfigService;
+
+    @Override
+    public void run(ApplicationArguments args) {
+        // 解密iov配置信息
+        iovConfigService.initialIovConfig();
         // 启动IOV任务服务
 
     }

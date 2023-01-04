@@ -3,6 +3,7 @@ package com.tts.iov.domain;
 import com.tts.common.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * IOV Config 实体类
@@ -10,9 +11,15 @@ import lombok.EqualsAndHashCode;
  * @author FangYuan
  * @since 2023-01-04 13:54:59
  */
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class IovConfig extends BaseEntity {
+
+    public IovConfig(String iovType, String configInfo) {
+        this.iovType = iovType;
+        this.configInfo = configInfo;
+    }
 
     /**
      * 中交兴路、G7

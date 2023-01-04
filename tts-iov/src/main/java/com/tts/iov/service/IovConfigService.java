@@ -11,4 +11,18 @@ import com.tts.iov.domain.IovConfig;
  */
 public interface IovConfigService extends IService<IovConfig> {
 
+    /**
+     * 初始化Iov配置信息
+     */
+    void initialIovConfig();
+
+    /**
+     * 根据类型查询iov type
+     */
+    IovConfig getByIovType(String iovType);
+
+    /**
+     * 新增or修改Iov Config
+     */
+    boolean saveOrUpdateIovConfig(IovConfig iovConfig);
 }
