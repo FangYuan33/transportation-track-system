@@ -1,7 +1,7 @@
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8080
+  port: 0
   servlet:
     # 应用的访问路径
     context-path: /
@@ -25,7 +25,7 @@ logging:
 # Spring配置
 spring:
   application:
-    name: node1
+    name: tts-node
   profiles: 
     active: druid
   # 服务模块
@@ -62,7 +62,6 @@ mybatis-plus:
 
 # zookeeper配置
 zookeeper:
-  serviceName: ${spring.application.name}
   address: 101.43.163.223:2181
   sessionTimeout: 10000
   connectTimeout: 20000
@@ -70,7 +69,8 @@ zookeeper:
   masterPath: /tts/server/master
   treePath: /tts/server/tree
   node:
-    heartbeatInterval: 1000
+    # 节点心跳记录间隔
+    heartbeatInterval: 10000
 
 # Swagger配置
 swagger:
