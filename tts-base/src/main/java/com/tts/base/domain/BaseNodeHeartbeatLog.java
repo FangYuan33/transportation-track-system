@@ -19,9 +19,9 @@ public class BaseNodeHeartbeatLog extends BaseEntity {
     /**
      * 服务名称
      */
-    private String serviceName;
+    private String serverName;
 
     public BaseNodeHeartbeatLog(String serviceName) {
-        this.serviceName = serviceName;
+        this.serverName = serviceName;
     }
 }

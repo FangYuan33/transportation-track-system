@@ -21,17 +21,17 @@ import java.time.LocalDateTime;
 public class BaseNodeHeartbeat extends BaseEntity {
 
     public BaseNodeHeartbeat(String serviceName, LocalDateTime latestHeartBeatTime) {
-        this.serviceName = serviceName;
-        this.latestHeartBeatTime = latestHeartBeatTime;
+        this.serverName = serviceName;
+        this.latestHeartbeatTime = latestHeartBeatTime;
     }
 
     /**
      * 服务名称
      */
-    private String serviceName;
+    private String serverName;
 
     /**
      * 最新心跳时间
      */
-    private LocalDateTime latestHeartBeatTime;
+    private LocalDateTime latestHeartbeatTime;
 }

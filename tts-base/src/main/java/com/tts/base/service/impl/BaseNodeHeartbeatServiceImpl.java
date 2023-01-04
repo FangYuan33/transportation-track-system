@@ -24,7 +24,7 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
     @Autowired
     private BaseNodeHeartbeatLogService nodeHeartbeatLogService;
 
-    @Value("${zookeeper:node:heartbeatInterval}")
+    @Value("${zookeeper.node.heartbeatInterval}")
     private long HEARTBEAT_INTERVAL;
 
     private String serviceName;
@@ -54,16 +54,21 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
         heartbeatFlag = true;
     }
 
-
-
+    /**
+     * 开始记录心跳的线程任务
+     */
     private void startHeartbeatTask() {
-        // 初始化该节点的心跳记录
-        initialServerHeartbeat();
-        // 初始化心跳线程
-        initialHeartbeatThread();
+        try {
+            // 初始化该节点的心跳记录
+            initialServerHeartbeat();
+            // 初始化心跳线程
+            initialHeartbeatThread();
 
-        // 开启线程执行任务
-        heartbeatThread.start();
+            // 开启线程执行任务
+            heartbeatThread.start();
+        } catch (Exception e) {
+            log.error("Start Heartbeat Task Error", e);
+        }
     }
 
     /**
@@ -73,7 +78,7 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
     private void initialServerHeartbeat() {
         // 根据名称先查出来
         LambdaQueryWrapper<BaseNodeHeartbeat> wrapper = new QueryWrapper<BaseNodeHeartbeat>()
-                .lambda().eq(BaseNodeHeartbeat::getServiceName, serviceName);
+                .lambda().eq(BaseNodeHeartbeat::getServerName, serviceName);
         BaseNodeHeartbeat nodeHeartbeat = baseMapper.selectOne(wrapper);
 
         if (nodeHeartbeat == null) {
@@ -119,8 +124,8 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
      */
     private void updateServerHeartbeat(String serviceName) {
         LambdaUpdateWrapper<BaseNodeHeartbeat> updateWrapper = new UpdateWrapper<BaseNodeHeartbeat>().lambda()
-                .set(BaseNodeHeartbeat::getLatestHeartBeatTime, LocalDateTime.now())
-                .eq(BaseNodeHeartbeat::getServiceName, serviceName);
+                .set(BaseNodeHeartbeat::getLatestHeartbeatTime, LocalDateTime.now())
+                .eq(BaseNodeHeartbeat::getServerName, serviceName);
 
         baseMapper.update(null, updateWrapper);
     }
