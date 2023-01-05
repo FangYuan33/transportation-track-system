@@ -6,6 +6,7 @@
 
 - `tts-start`: 轨迹服务启动模块，包含启动类和一些必要的ApplicationRunner
 - `tts-node`: 轨迹服务节点模块，主要是关于节点的功能：节点的配置和和心跳记录
+- `tts-remote`: Dubbo RPC 接口模块，供其他项目依赖、调用
 - `tts-framework`: 框架支持，包含一些配置
 - `tts-common`: 通用的枚举和工具类等...
 
