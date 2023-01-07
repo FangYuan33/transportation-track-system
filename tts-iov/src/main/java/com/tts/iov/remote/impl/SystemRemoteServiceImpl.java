@@ -2,6 +2,7 @@ package com.tts.iov.remote.impl;
 
 import com.tts.iov.domain.IovConfig;
 import com.tts.iov.service.IovConfigService;
+import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.remote.dto.IovConfigDto;
 import com.tts.remote.service.SystemRemoteService;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -14,9 +15,21 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
 
     @Autowired
     private IovConfigService iovConfigService;
+    @Autowired
+    private IovSubscribeTaskService iovSubscribeTaskService;
 
     @Override
     public boolean saveOrUpdateIovConfig(IovConfigDto iovConfig) {
         return iovConfigService.saveOrUpdateIovConfig(new IovConfig(iovConfig.getIovType(), iovConfig.getConfigInfo()));
+    }
+
+    @Override
+    public boolean startSubscribeTask(String carrierCode, String iovType) {
+        return iovSubscribeTaskService.startSubscribeTask(carrierCode, iovType);
+    }
+
+    @Override
+    public boolean stopSubscribeTask(String carrierCode, String iovType) {
+        return iovSubscribeTaskService.stopSubscribeTask(carrierCode, iovType);
     }
 }
