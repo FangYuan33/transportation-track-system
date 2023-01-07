@@ -8,6 +8,7 @@ import com.tts.common.utils.ip.IpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
@@ -18,11 +19,14 @@ import org.apache.zookeeper.common.Time;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -34,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author FangYuan
  * @since 2022-12-26 15:05:18
  */
+@Order(value = 0)
 @Slf4j
 @Component
 public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeable, InitializingBean {
@@ -49,9 +54,14 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     private BaseServerStateLogService baseServerStateLogService;
 
     /**
-     * 节点服务名称
+     * 节点服务名称 IP:currentTime
      */
     private String serviceName;
+
+    /**
+     * 当前节点路径，用来向zookeeper上注册
+     */
+    private String currentNodePath;
 
     private CuratorFramework curatorFramework;
     /**
@@ -74,18 +84,20 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
     @Override
     public void afterPropertiesSet() {
+        // 标记为普通节点
+        isLeader = new AtomicBoolean(false);
+        // 服务节点名: IP:currentTime
+        serviceName = IpUtils.getHostIp() + ":" + Time.currentElapsedTime();
+        // treePath + serviceName
+        currentNodePath = nodeProperties.getTreePath() + "/" + serviceName;
+        TtsContext.setNodeServerName(serviceName);
+
         RetryForever retryForever = new RetryForever(nodeProperties.getRetryCountInterval());
         curatorFramework = CuratorFrameworkFactory.newClient(nodeProperties.getAddress(),
                 nodeProperties.getSessionTimeout(), nodeProperties.getConnectTimeout(), retryForever);
 
         leaderSelector = new LeaderSelector(curatorFramework, nodeProperties.getMasterPath(), this);
-        treeCache = new TreeCache(curatorFramework, nodeProperties.getTreePath());
-
-        // 标记为普通节点
-        isLeader = new AtomicBoolean(false);
-        // 服务节点名: IP:currentTime
-        serviceName = IpUtils.getHostIp() + ":" + Time.currentElapsedTime();
-        TtsContext.setNodeServerName(serviceName);
+        treeCache = new TreeCache(curatorFramework, currentNodePath);
 
         /*
          当节点执行完takeLeadership()方法时，它会放弃Leader的身份
@@ -115,8 +127,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             // 创建容器节点路径，这个treePath不存在不行
             Stat treePathStat = curatorFramework.checkExists().forPath(nodeProperties.getTreePath());
             if (treePathStat == null) {
-                curatorFramework.create().creatingParentContainersIfNeeded()
-                        .withMode(CreateMode.EPHEMERAL)
+                curatorFramework.create().creatingParentsIfNeeded()
                         .forPath(nodeProperties.getTreePath(), LocalDateTime.now().toString().getBytes(StandardCharsets.UTF_8));
             }
 
@@ -177,9 +188,28 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
         curatorFramework.start();
         leaderSelector.start();
+
+        createNodePath();
         registerConnectionListener();
 
         log.info("TTS Node {} start over!!!", serviceName);
+    }
+
+    /**
+     * 创建当前节点（临时），当断开连接时删除该节点，这样就能保证根路径下永远都是已连接状态的服务
+     *
+     * treePath/serverName1, treePath/serverName2...
+     */
+    private void createNodePath() {
+        try {
+            Stat treePathStat = curatorFramework.checkExists().forPath(currentNodePath);
+            if (treePathStat == null) {
+                curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)
+                        .forPath(currentNodePath, LocalDateTime.now().toString().getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -234,6 +264,23 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         }
 
         log.info("TTS Node {} close over!!!", serviceName);
+    }
+
+    /**
+     * 获取该路径下注册的所有IP
+     *
+     * etc: [treePath/serverName1, treePath/serverName2...]
+     */
+    public List<String> getServerIpList() {
+        try {
+            if (curatorFramework != null && CuratorFrameworkState.STARTED.equals(curatorFramework.getState())) {
+                return curatorFramework.getChildren().forPath(nodeProperties.getTreePath());
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("TTS Node getAllServerIpList error !!!", e);
+            return new ArrayList<>();
+        }
     }
 
     /**
