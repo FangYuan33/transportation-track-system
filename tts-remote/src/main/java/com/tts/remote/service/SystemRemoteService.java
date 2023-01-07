@@ -1,6 +1,7 @@
 package com.tts.remote.service;
 
 import com.tts.remote.dto.IovConfigDto;
+import com.tts.remote.dto.IovSubscribeTaskVehicleDto;
 
 public interface SystemRemoteService {
 
@@ -18,4 +19,14 @@ public interface SystemRemoteService {
      * 关闭该承运商的订阅任务
      */
     boolean stopSubscribeTask(String carrierCode, String iovType);
+
+    /**
+     * 添加车辆订阅任务
+     */
+    boolean addVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto);
+
+    /**
+     * 移除车辆订阅任务
+     */
+    boolean removeVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto);
 }
