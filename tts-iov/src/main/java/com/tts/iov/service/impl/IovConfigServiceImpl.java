@@ -43,7 +43,7 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
     public IovConfig getByIovType(String iovType) {
         String configInfo = localCache.get(iovType);
         if (configInfo != null) {
-            return (IovConfig) JSONObject.parse(configInfo);
+            return JSONObject.parseObject(configInfo, IovConfig.class);
         } else {
             try {
                 IovConfig iovConfig = baseMapper.selectOne(new QueryWrapper<IovConfig>().lambda().eq(IovConfig::getIovType, iovType));
