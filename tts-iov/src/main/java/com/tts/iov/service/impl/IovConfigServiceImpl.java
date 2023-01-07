@@ -1,5 +1,6 @@
 package com.tts.iov.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -30,7 +31,8 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
             List<IovConfig> iovConfigs = baseMapper.selectList(new QueryWrapper<>());
 
             for (IovConfig iovConfig : iovConfigs) {
-                localCache.put(iovConfig.getIovType(), DESUtil.decrypt(iovConfig.getConfigInfo()));
+                iovConfig.setConfigInfo(DESUtil.decrypt(iovConfig.getConfigInfo()));
+                localCache.put(iovConfig.getIovType(), JSONObject.toJSONString(iovConfig));
             }
         } catch (Exception e) {
             log.error("Initial Iov Config Error", e);
@@ -41,7 +43,7 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
     public IovConfig getByIovType(String iovType) {
         String configInfo = localCache.get(iovType);
         if (configInfo != null) {
-            return new IovConfig(iovType, configInfo);
+            return (IovConfig) JSONObject.parse(configInfo);
         } else {
             try {
                 IovConfig iovConfig = baseMapper.selectOne(new QueryWrapper<IovConfig>().lambda().eq(IovConfig::getIovType, iovType));
@@ -49,7 +51,7 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
                     // 解密
                     iovConfig.setConfigInfo(DESUtil.decrypt(iovConfig.getConfigInfo()));
                     // 加入本地缓存
-                    localCache.put(iovType, iovConfig.getConfigInfo());
+                    localCache.put(iovType, JSONObject.toJSONString(iovConfig));
 
                     return iovConfig;
                 }
@@ -67,19 +69,20 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
         checkUpdateIovConfigInfo(iovConfig);
 
         try {
+            iovConfig.setConfigInfo(DESUtil.encrypt(iovConfig.getConfigInfo()));
             String iovConfigInfo = localCache.get(iovConfig.getIovType());
             if (iovConfigInfo != null) {
                 // 更新数据库
                 LambdaUpdateWrapper<IovConfig> updateWrapper = new UpdateWrapper<IovConfig>().lambda()
-                        .set(IovConfig::getConfigInfo, DESUtil.encrypt(iovConfig.getConfigInfo()))
+                        .set(IovConfig::getConfigInfo, iovConfig.getConfigInfo())
                         .eq(IovConfig::getIovType, iovConfig.getIovType());
                 baseMapper.update(null, updateWrapper);
             } else {
                 // 存库
-                baseMapper.insert(new IovConfig(iovConfig.getIovType(), DESUtil.encrypt(iovConfig.getConfigInfo())));
+                baseMapper.insert(iovConfig);
             }
             // 更新缓存
-            localCache.put(iovConfig.getIovType(), iovConfig.getConfigInfo());
+            localCache.put(iovConfig.getIovType(), JSONObject.toJSONString(iovConfig));
         } catch (Exception e) {
             log.error("Save or Update Iov Config Error", e);
             return false;
