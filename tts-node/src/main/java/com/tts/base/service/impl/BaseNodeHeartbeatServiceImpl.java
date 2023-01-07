@@ -1,5 +1,6 @@
 package com.tts.base.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,6 +29,8 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
 
     @Value("${zookeeper.node.heartbeatInterval}")
     private long HEARTBEAT_INTERVAL;
+    @Value("${zookeeper.node.heartbeatTimeout}")
+    private long HEARTBEAT_TIMEOUT;
 
     private String serviceName;
 
@@ -128,5 +133,25 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
                 .eq(BaseNodeHeartbeat::getServerName, serviceName);
 
         baseMapper.update(null, updateWrapper);
+    }
+
+    @Override
+    public List<BaseNodeHeartbeat> listByServerNames(List<String> serverNames) {
+        Wrapper<BaseNodeHeartbeat> queryWrapper = new QueryWrapper<BaseNodeHeartbeat>()
+                .lambda().in(BaseNodeHeartbeat::getServerName, serverNames);
+
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public boolean isTimeOut(BaseNodeHeartbeat nodeHeartbeat) {
+        return nodeHeartbeat == null || isTimeOut(nodeHeartbeat.getLatestHeartbeatTime());
+    }
+
+    /**
+     * 当前时间 - 上次心跳时间 > 超时时间间隔 则为超时
+     */
+    private boolean isTimeOut(LocalDateTime lastHeartbeatTime) {
+        return LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - lastHeartbeatTime.toEpochSecond(ZoneOffset.UTC) > HEARTBEAT_TIMEOUT;
     }
 }

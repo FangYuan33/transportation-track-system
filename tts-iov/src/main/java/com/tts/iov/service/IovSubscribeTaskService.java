@@ -2,6 +2,8 @@ package com.tts.iov.service;
 
 import com.tts.iov.domain.IovSubscribeTask;
 
+import java.util.List;
+
 /**
  * iov 任务订阅服务层
  */
@@ -18,4 +20,19 @@ public interface IovSubscribeTaskService {
     boolean stopSubscribeTask(String carrierCode, String iovType);
 
     IovSubscribeTask selectByIovConfigIdAndCarrierCode(Long iovConfigId, String carrierCode);
+
+    /**
+     * 获取所有正在运行的任务
+     */
+    List<IovSubscribeTask> listRunningTask();
+
+    /**
+     * 获取所有服务下的任务
+     */
+    List<IovSubscribeTask> listByServerNames(List<String> serverNames);
+
+    /**
+     * 将任务置为待分配
+     */
+    void allocatingTask(IovSubscribeTask task);
 }

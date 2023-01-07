@@ -3,6 +3,8 @@ package com.tts.base.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tts.base.domain.BaseNodeHeartbeat;
 
+import java.util.List;
+
 /**
  * 节点心跳服务层
  *
@@ -17,4 +19,14 @@ public interface BaseNodeHeartbeatService extends IService<BaseNodeHeartbeat> {
      * @param serviceName 服务名称
      */
     void startHeartbeat(String serviceName);
+
+    /**
+     * 获取所有符合条件服务名的心跳记录
+     */
+    List<BaseNodeHeartbeat> listByServerNames(List<String> serverNames);
+
+    /**
+     * 判断该节点是否心跳超时
+     */
+    boolean isTimeOut(BaseNodeHeartbeat nodeHeartbeat);
 }

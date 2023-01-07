@@ -71,6 +71,8 @@ zookeeper:
   node:
     # 节点心跳记录间隔
     heartbeatInterval: 10000
+    # 节点心跳超时时间 10s
+    heartbeatTimeout: 10000
 
 dubbo:
   application:
