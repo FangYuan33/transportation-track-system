@@ -48,3 +48,13 @@ CREATE TABLE `iov_subscribe_task`
     `update_time`   datetime    NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB COMMENT='Iov任务订阅表';
+
+CREATE TABLE `iov_subscribe_task_vehicle`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT,
+    `task_id`     bigint(20) NOT NULL COMMENT 'iov任务订阅ID',
+    `vehicle_no`  varchar(20) NOT NULL COMMENT '车牌号',
+    `create_time` datetime    NOT NULL COMMENT '创建时间',
+    `update_time` datetime    NOT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB COMMENT='Iov任务车辆订阅明细表';
