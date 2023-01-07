@@ -1,6 +1,7 @@
 package com.tts.base.zookeeper;
 
 import com.tts.base.enums.ServerState;
+import com.tts.common.context.TtsContext;
 import com.tts.framework.config.properties.ZkProperties;
 import com.tts.base.service.BaseServerStateLogService;
 import com.tts.common.utils.ip.IpUtils;
@@ -84,6 +85,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         isLeader = new AtomicBoolean(false);
         // 服务节点名: IP:currentTime
         serviceName = IpUtils.getHostIp() + ":" + Time.currentElapsedTime();
+        TtsContext.setNodeServerName(serviceName);
 
         /*
          当节点执行完takeLeadership()方法时，它会放弃Leader的身份
