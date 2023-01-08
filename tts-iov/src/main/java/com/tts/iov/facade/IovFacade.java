@@ -6,7 +6,8 @@ import com.tts.remote.dto.IovVehicleQueryDto;
 import java.util.List;
 
 /**
- * 通用的IOV信息查询通用接口
+ * 通用的IOV信息查询通用接口，具体的实现类需要包含ivo设备类型名
+ * 这样在使用策略模式的时候就能够轻易获取
  */
 public interface IovFacade {
 
