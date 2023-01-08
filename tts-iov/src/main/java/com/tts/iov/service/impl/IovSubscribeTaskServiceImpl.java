@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.tts.iov.enums.IovSubscribeTaskStateEnums.*;
@@ -174,5 +175,14 @@ public class IovSubscribeTaskServiceImpl extends ServiceImpl<IovSubscribeTaskMap
         baseMapper.updateById(allocatedTask);
 
         log.info("{} Task Is Running!", JSONObject.toJSONString(allocatedTask));
+    }
+
+    @Override
+    public List<IovSubscribeTask> listCurrentNodeAllocatedAndRunningTask() {
+        LambdaQueryWrapper<IovSubscribeTask> queryWrapper = new QueryWrapper<IovSubscribeTask>().lambda()
+                .eq(IovSubscribeTask::getServerName, TtsContext.getNodeServerName())
+                .in(IovSubscribeTask::getState, Arrays.asList(ALLOCATED.getValue(), RUNNING.getValue()));
+
+        return baseMapper.selectList(queryWrapper);
     }
 }

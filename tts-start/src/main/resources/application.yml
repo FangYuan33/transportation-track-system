@@ -69,11 +69,11 @@ zookeeper:
   masterPath: /tts/server/master
   treePath: /tts/server/tree
   node:
-    # 节点心跳记录间隔
+    # 节点心跳记录间隔 ms
     heartbeatInterval: 10000
-    # 节点心跳超时时间 10s
-    heartbeatTimeout: 10000
-    # 执行节点任务的间隔时间
+    # 节点心跳超时时间 s
+    heartbeatTimeout: 60
+    # 执行节点任务的间隔时间 ms
     taskInterval: 10000
 
 dubbo:

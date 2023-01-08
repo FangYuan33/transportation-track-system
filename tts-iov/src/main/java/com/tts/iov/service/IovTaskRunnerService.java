@@ -88,6 +88,8 @@ public class IovTaskRunnerService {
         try {
             // 心跳检测
             checkHeartbeat();
+            // 将自己的任务改成待分配
+            transferLeaderTask();
             // 分配任务
             allocatingTask();
         } catch (Exception e) {
@@ -124,6 +126,18 @@ public class IovTaskRunnerService {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * 若有之前的leader宕机，新晋的leader需要把手头的任务转换成待分配状态
+     * 供其他follower节点执行
+     */
+    private void transferLeaderTask() {
+        List<IovSubscribeTask> taskList = iovSubscribeTaskService.listCurrentNodeAllocatedAndRunningTask();
+
+        for (IovSubscribeTask task : taskList) {
+            iovSubscribeTaskService.allocatingTask(task);
         }
     }
 
