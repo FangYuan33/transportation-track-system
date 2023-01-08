@@ -1,9 +1,12 @@
 package com.tts.iov.remote.impl;
 
 import com.tts.common.exception.ServiceException;
+import com.tts.common.utils.spring.BeanUtils;
 import com.tts.common.utils.spring.SpringUtils;
+import com.tts.facade.dto.FacadeCoordinatePointResultDto;
+import com.tts.facade.dto.FacadeVehicleQueryDto;
+import com.tts.facade.service.IovFacade;
 import com.tts.iov.domain.IovConfig;
-import com.tts.iov.facade.IovFacade;
 import com.tts.iov.service.IovConfigService;
 import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.iov.service.IovSubscribeTaskVehicleService;
@@ -70,12 +73,26 @@ public class SystemRemoteServiceImpl implements SystemRemoteService, Initializin
 
     @Override
     public List<CoordinatePointResultDto> queryIovVehicleLastLocationDirectly(IovVehicleQueryDto vehicleQueryDto) {
-        return getSpecificService(vehicleQueryDto.getIovTypeEnum()).queryIovVehicleLastLocationDirectly(vehicleQueryDto);
+        // 入参类型转换
+        FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
+
+        List<FacadeCoordinatePointResultDto> result = getSpecificService(vehicleQueryDto.getIovTypeEnum())
+                .queryIovVehicleLastLocationDirectly(facadeVehicleQueryDto);
+
+        // 出参类型转换
+        return BeanUtils.copyList(result, CoordinatePointResultDto.class);
     }
 
     @Override
     public List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto) {
-        return getSpecificService(vehicleQueryDto.getIovTypeEnum()).queryIovVehicleTrackDirectly(vehicleQueryDto);
+        // 入参类型转换
+        FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
+
+        List<FacadeCoordinatePointResultDto> result = getSpecificService(vehicleQueryDto.getIovTypeEnum())
+                .queryIovVehicleTrackDirectly(facadeVehicleQueryDto);
+
+        // 出参类型转换
+        return BeanUtils.copyList(result, CoordinatePointResultDto.class);
     }
 
     /**

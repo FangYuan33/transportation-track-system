@@ -1,4 +1,4 @@
-package com.tts.iov.facade.dto;
+package com.tts.facade.dto;
 
 import lombok.Data;
 

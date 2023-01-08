@@ -1,7 +1,7 @@
-package com.tts.iov.facade.impl;
+package com.tts.facade.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.tts.common.constant.HttpHeader;
 import com.tts.common.constant.HttpSchema;
 import com.tts.common.core.domain.Request;
@@ -9,18 +9,13 @@ import com.tts.common.core.domain.Response;
 import com.tts.common.enums.Method;
 import com.tts.common.utils.http.Client;
 import com.tts.common.utils.http.MessageDigestUtil;
-import com.tts.iov.domain.IovConfig;
-import com.tts.iov.facade.IovFacade;
-import com.tts.iov.facade.constant.G7UrlConstant;
-import com.tts.iov.facade.dto.PointToPointLocationData;
-import com.tts.iov.facade.dto.PointToPointTrackData;
-import com.tts.iov.service.IovConfigService;
-import com.tts.remote.dto.CoordinatePointResultDto;
-import com.tts.remote.dto.IovVehicleQueryDto;
-import com.tts.remote.enums.IovTypeEnums;
+import com.tts.facade.dto.FacadeCoordinatePointResultDto;
+import com.tts.facade.dto.FacadeVehicleQueryDto;
+import com.tts.facade.constant.G7UrlConstant;
+import com.tts.facade.dto.PointToPointLocationData;
+import com.tts.facade.dto.PointToPointTrackData;
+import com.tts.facade.service.IovFacade;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -30,30 +25,14 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class IovFacadeG7Impl implements IovFacade, InitializingBean {
-
-    @Autowired
-    private IovConfigService iovConfigService;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void afterPropertiesSet() {
-        IovConfig iovConfig = iovConfigService.getByIovType(IovTypeEnums.G7.getValue());
-        if (iovConfig != null) {
-            Map<String, String> map = JSONObject.parseObject(iovConfig.getConfigInfo(), Map.class);
-
-            baseUrl = map.get("baseUrl");
-            accessId = map.get("accessId");
-            secretKey = map.get("secretKey");
-        }
-    }
+public class IovFacadeG7Impl implements IovFacade {
 
     private String baseUrl;
     private String accessId;
     private String secretKey;
 
     @Override
-    public List<CoordinatePointResultDto> queryIovVehicleLastLocationDirectly(IovVehicleQueryDto vehicleQueryDto) {
+    public List<FacadeCoordinatePointResultDto> queryIovVehicleLastLocationDirectly(FacadeVehicleQueryDto vehicleQueryDto) {
         // 封装入参
         String json = initialQueryVehicleLastLocationByVehicleNoParam(vehicleQueryDto.getVehicleNo());
         // 执行请求，获取结果参数
@@ -62,7 +41,7 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
         if (resultData != null) {
             PointToPointLocationData pointInfo = resultData.toJavaObject(PointToPointLocationData.class);
             // 初始化结果对象参数
-            CoordinatePointResultDto result = initialVehicleLastLocationByVehicleNoResult(pointInfo, vehicleQueryDto.getVehicleNo());
+            FacadeCoordinatePointResultDto result = initialVehicleLastLocationByVehicleNoResult(pointInfo, vehicleQueryDto.getVehicleNo());
 
             return Collections.singletonList(result);
         }
@@ -87,9 +66,9 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
     /**
      * 初始化端对端查询车辆位置的结果对象参数
      */
-    private CoordinatePointResultDto initialVehicleLastLocationByVehicleNoResult(PointToPointLocationData pointInfo,
-                                                                                 String vehicleNo) {
-        CoordinatePointResultDto result = new CoordinatePointResultDto();
+    private FacadeCoordinatePointResultDto initialVehicleLastLocationByVehicleNoResult(PointToPointLocationData pointInfo,
+                                                                                       String vehicleNo) {
+        FacadeCoordinatePointResultDto result = new FacadeCoordinatePointResultDto();
         // 车牌号
         result.setVehicleNo(vehicleNo);
         // 定位时间
@@ -112,7 +91,7 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
      * 第二次及之后的请求，需要带上上一次请求返回的序列号并且以上一次的最后一个点位的打点时间作为第二次请求的开始时间
      */
     @Override
-    public List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto) {
+    public List<FacadeCoordinatePointResultDto> queryIovVehicleTrackDirectly(FacadeVehicleQueryDto vehicleQueryDto) {
         // 封装入参
         String json = initialQueryVehicleTrackParam(vehicleQueryDto.getVehicleNo(),
                 vehicleQueryDto.getTimeStart(), vehicleQueryDto.getTimeEnd());
@@ -202,9 +181,9 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
     /**
      * 将G7端到端轨迹信息转换成通用的点位结果对象
      */
-    private List<CoordinatePointResultDto> convertG7PointsToCommonIovPoint(List<PointToPointTrackData> allTracePoints,
-                                                                           String vehicleNo) {
-        List<CoordinatePointResultDto> result = new ArrayList<>(allTracePoints.size());
+    private List<FacadeCoordinatePointResultDto> convertG7PointsToCommonIovPoint(List<PointToPointTrackData> allTracePoints,
+                                                                                 String vehicleNo) {
+        List<FacadeCoordinatePointResultDto> result = new ArrayList<>(allTracePoints.size());
         for (PointToPointTrackData point : allTracePoints) {
             result.add(initialVehicleTrackInfo(point, vehicleNo));
         }
@@ -215,8 +194,8 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
     /**
      * 初始化端对端车辆轨迹点位信息
      */
-    private CoordinatePointResultDto initialVehicleTrackInfo(PointToPointTrackData point, String vehicleNo) {
-        CoordinatePointResultDto result = new CoordinatePointResultDto();
+    private FacadeCoordinatePointResultDto initialVehicleTrackInfo(PointToPointTrackData point, String vehicleNo) {
+        FacadeCoordinatePointResultDto result = new FacadeCoordinatePointResultDto();
         // 车牌号
         result.setVehicleNo(vehicleNo);
         try {

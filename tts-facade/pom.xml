@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tts-iov</artifactId>
+    <artifactId>tts-facade</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -18,25 +18,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.tts</groupId>
-            <artifactId>tts-node</artifactId>
-            <version>${tts.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.tts</groupId>
-            <artifactId>tts-remote</artifactId>
-            <version>${tts.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tts</groupId>
-            <artifactId>tts-facade</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <artifactId>tts-framework</artifactId>
         </dependency>
     </dependencies>
 </project>

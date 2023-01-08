@@ -121,6 +121,13 @@
                 <version>${tts.version}</version>
             </dependency>
 
+            <!-- facade模块 -->
+            <dependency>
+                <groupId>com.tts</groupId>
+                <artifactId>tts-facade</artifactId>
+                <version>${tts.version}</version>
+            </dependency>
+
             <!-- lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -180,6 +187,7 @@
         <module>tts-node</module>
         <module>tts-iov</module>
         <module>tts-remote</module>
+        <module>tts-facade</module>
     </modules>
     <packaging>pom</packaging>
 
