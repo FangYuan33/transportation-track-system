@@ -1,7 +1,11 @@
 package com.tts.remote.service;
 
+import com.tts.remote.dto.CoordinatePointResultDto;
 import com.tts.remote.dto.IovConfigDto;
 import com.tts.remote.dto.IovSubscribeTaskVehicleDto;
+import com.tts.remote.dto.IovVehicleQueryDto;
+
+import java.util.List;
 
 public interface SystemRemoteService {
 
@@ -29,4 +33,16 @@ public interface SystemRemoteService {
      * 移除车辆订阅任务
      */
     boolean removeVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto);
+
+    /**
+     * 通过iov平台查询指定车辆最新坐标信息，相关信息不存入数据库
+     * 一次只能查询一个车的位置
+     */
+    List<CoordinatePointResultDto> queryIovVehicleLastLocationDirectly(IovVehicleQueryDto vehicleQueryDto);
+
+    /**
+     * 直接通过iov平台查询指定车辆的路径信息，相关信息不存入数据库
+     * 一次只能查询一个车的轨迹
+     */
+    List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto);
 }
