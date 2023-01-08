@@ -116,10 +116,12 @@ public class IovTaskRunnerService {
             }
 
             // 剩下心跳超时的节点，将其上的未完成的任务全部标记为待分配
-            List<IovSubscribeTask> timeOutTask = iovSubscribeTaskService.listByServerNames(serverNames);
-            for (IovSubscribeTask task : timeOutTask) {
-                if (ALLOCATED.getValue().equals(task.getState()) || RUNNING.getValue().equals(task.getState())) {
-                    iovSubscribeTaskService.allocatingTask(task);
+            if (!serverNames.isEmpty()) {
+                List<IovSubscribeTask> timeOutTask = iovSubscribeTaskService.listByServerNames(serverNames);
+                for (IovSubscribeTask task : timeOutTask) {
+                    if (ALLOCATED.getValue().equals(task.getState()) || RUNNING.getValue().equals(task.getState())) {
+                        iovSubscribeTaskService.allocatingTask(task);
+                    }
                 }
             }
         }
