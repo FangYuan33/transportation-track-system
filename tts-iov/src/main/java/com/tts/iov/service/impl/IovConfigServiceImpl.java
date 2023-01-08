@@ -7,13 +7,19 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tts.common.exception.ServiceException;
 import com.tts.common.utils.DESUtil;
+import com.tts.facade.enums.IovTypeEnums;
+import com.tts.facade.service.IovFacade;
 import com.tts.iov.dao.IovConfigMapper;
 import com.tts.iov.domain.IovConfig;
+import com.tts.iov.facade.FacadeService;
 import com.tts.iov.service.IovConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -25,8 +31,21 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
      */
     private final ConcurrentHashMap<String, String> localCache = new ConcurrentHashMap<>(4);
 
+    @Autowired
+    private FacadeService facadeService;
+
     @Override
     public void initialIovConfig() {
+        // 缓存
+        cacheIovConfig();
+        // 初始化各个不同GPS Service设备的配置信息
+        initialIovTypeConfigInfo();
+    }
+
+    /**
+     * 将Iov config 缓存
+     */
+    private void cacheIovConfig() {
         try {
             List<IovConfig> iovConfigs = baseMapper.selectList(new QueryWrapper<>());
 
@@ -36,6 +55,26 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
             }
         } catch (Exception e) {
             log.error("Initial Iov Config Error", e);
+        }
+    }
+
+    /**
+     * 初始化各个不同GPS Service设备的配置信息
+     */
+    @SuppressWarnings("unchecked")
+    private void initialIovTypeConfigInfo() {
+        Enumeration<String> keys = localCache.keys();
+
+        if (keys.hasMoreElements()) {
+            String iovType = keys.nextElement();
+            try {
+                IovConfig iovConfig = JSONObject.parseObject(localCache.get(iovType), IovConfig.class);
+
+                IovFacade specificService = facadeService.getSpecificService(IovTypeEnums.parse(iovType));
+                specificService.initialConfigInfo(JSONObject.parseObject(iovConfig.getConfigInfo(), Map.class));
+            } catch (Exception e) {
+                log.error("Initial IovType [" + iovType + "] Config Info Error", e);
+            }
         }
     }
 

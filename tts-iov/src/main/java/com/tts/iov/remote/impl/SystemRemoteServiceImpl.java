@@ -3,6 +3,7 @@ package com.tts.iov.remote.impl;
 import com.tts.common.utils.spring.BeanUtils;
 import com.tts.facade.dto.FacadeCoordinatePointResultDto;
 import com.tts.facade.dto.FacadeVehicleQueryDto;
+import com.tts.facade.enums.IovTypeEnums;
 import com.tts.iov.domain.IovConfig;
 import com.tts.iov.facade.FacadeService;
 import com.tts.iov.service.IovConfigService;
@@ -61,6 +62,7 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     public List<CoordinatePointResultDto> queryIovVehicleLastLocationDirectly(IovVehicleQueryDto vehicleQueryDto) {
         // 入参类型转换
         FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
+        facadeVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
 
         List<FacadeCoordinatePointResultDto> result = facadeService.queryIovVehicleLastLocationDirectly(facadeVehicleQueryDto);
 
@@ -72,6 +74,7 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     public List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto) {
         // 入参类型转换
         FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
+        facadeVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
 
         List<FacadeCoordinatePointResultDto> result = facadeService.queryIovVehicleTrackDirectly(facadeVehicleQueryDto);
 

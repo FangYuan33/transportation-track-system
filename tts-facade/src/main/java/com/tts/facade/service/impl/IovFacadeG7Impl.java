@@ -32,6 +32,13 @@ public class IovFacadeG7Impl implements IovFacade {
     private String secretKey;
 
     @Override
+    public void initialConfigInfo(Map<String, String> configInfo) {
+        baseUrl = configInfo.get("baseUrl");
+        accessId = configInfo.get("accessId");
+        secretKey = configInfo.get("secretKey");
+    }
+
+    @Override
     public List<FacadeCoordinatePointResultDto> queryIovVehicleLastLocationDirectly(FacadeVehicleQueryDto vehicleQueryDto) {
         // 封装入参
         String json = initialQueryVehicleLastLocationByVehicleNoParam(vehicleQueryDto.getVehicleNo());

@@ -13,4 +13,14 @@ public enum IovTypeEnums {
     public String getValue() {
         return value;
     }
+
+    public static IovTypeEnums parse(String value) {
+        for (IovTypeEnums iovType : values()) {
+            if (iovType.value.equals(value)) {
+                return iovType;
+            }
+        }
+
+        return null;
+    }
 }
