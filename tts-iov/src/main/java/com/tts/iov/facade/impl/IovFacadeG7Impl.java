@@ -39,11 +39,13 @@ public class IovFacadeG7Impl implements IovFacade, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         IovConfig iovConfig = iovConfigService.getByIovType(IovTypeEnums.G7.getValue());
-        Map<String, String> map = JSONObject.parseObject(iovConfig.getConfigInfo(), Map.class);
+        if (iovConfig != null) {
+            Map<String, String> map = JSONObject.parseObject(iovConfig.getConfigInfo(), Map.class);
 
-        baseUrl = map.get("baseUrl");
-        accessId = map.get("accessId");
-        secretKey = map.get("secretKey");
+            baseUrl = map.get("baseUrl");
+            accessId = map.get("accessId");
+            secretKey = map.get("secretKey");
+        }
     }
 
     private String baseUrl;
