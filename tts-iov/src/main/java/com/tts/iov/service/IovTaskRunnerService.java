@@ -148,15 +148,19 @@ public class IovTaskRunnerService {
     private void allocatingTask() {
         // 获取目前可用的serverIp列表
         List<String> serverNameList = node.getServerNameList();
-        Random random = new Random();
 
-        // 拿出来所有待分配的任务
-        List<IovSubscribeTask> allocatingTasks = iovSubscribeTaskService.listAllocatingTask();
+        // 有子节点才进行任务分配
+        if (!serverNameList.isEmpty()) {
+            Random random = new Random();
 
-        for (IovSubscribeTask task : allocatingTasks) {
-            // 将这个任务分配给随机一个服务
-            String serverName = serverNameList.get(random.nextInt(serverNameList.size()));
-            iovSubscribeTaskService.allocatedTask(task, serverName);
+            // 拿出来所有待分配的任务
+            List<IovSubscribeTask> allocatingTasks = iovSubscribeTaskService.listAllocatingTask();
+
+            for (IovSubscribeTask task : allocatingTasks) {
+                // 将这个任务分配给随机一个服务
+                String serverName = serverNameList.get(random.nextInt(serverNameList.size()));
+                iovSubscribeTaskService.allocatedTask(task, serverName);
+            }
         }
     }
 

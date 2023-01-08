@@ -82,13 +82,17 @@ public class SystemRemoteServiceImpl implements SystemRemoteService, Initializin
      * 获取具体业务类型的服务对象
      */
     private IovFacade getSpecificService(IovTypeEnums iovTypeEnum) {
-        Set<String> keySet = facadeMap.keySet();
-        for (String beanName : keySet) {
-            if (beanName.contains(iovTypeEnum.getValue())) {
-                return facadeMap.get(beanName);
+        if (iovTypeEnum != null) {
+            Set<String> keySet = facadeMap.keySet();
+            for (String beanName : keySet) {
+                if (beanName.contains(iovTypeEnum.getValue())) {
+                    return facadeMap.get(beanName);
+                }
             }
+
+            throw new ServiceException("不支持" + iovTypeEnum.getValue() + "类型查询");
         }
 
-        throw new ServiceException("不支持" + iovTypeEnum.getValue() + "类型查询");
+        throw new ServiceException("参数异常");
     }
 }
