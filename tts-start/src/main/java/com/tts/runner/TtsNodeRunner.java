@@ -32,7 +32,7 @@ public class TtsNodeRunner implements ApplicationRunner {
         log.info("TTS Node Runner start over!!!");
 
         log.info("TTS Node Heartbeat start!!!");
-        nodeHeartbeatService.startHeartbeat(ttsZkNode.getServiceName());
+        nodeHeartbeatService.startHeartbeat();
         log.info("TTS Node Heartbeat start over!!!");
     }
 }

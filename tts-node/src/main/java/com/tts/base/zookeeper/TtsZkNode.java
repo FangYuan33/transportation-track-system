@@ -273,7 +273,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      */
     public List<String> getServerNameList() {
         try {
-            if (curatorFramework != null && CuratorFrameworkState.STARTED.equals(curatorFramework.getState())) {
+            if (isLiving()) {
                 List<String> serverNames = curatorFramework.getChildren().forPath(nodeProperties.getTreePath());
                 // 移除主节点的服务名
                 serverNames.remove(serviceName);
@@ -286,6 +286,13 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
 
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * 是活着的状态？
+     */
+    public boolean isLiving() {
+        return curatorFramework != null && CuratorFrameworkState.STARTED.equals(curatorFramework.getState());
     }
 
     /**

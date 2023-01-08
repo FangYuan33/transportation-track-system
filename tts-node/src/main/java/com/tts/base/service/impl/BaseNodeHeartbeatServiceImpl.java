@@ -10,6 +10,7 @@ import com.tts.base.dao.BaseNodeHeartbeatMapper;
 import com.tts.base.domain.BaseNodeHeartbeat;
 import com.tts.base.service.BaseNodeHeartbeatLogService;
 import com.tts.base.service.BaseNodeHeartbeatService;
+import com.tts.base.zookeeper.TtsZkNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +26,14 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
         implements BaseNodeHeartbeatService {
 
     @Autowired
+    private TtsZkNode node;
+    @Autowired
     private BaseNodeHeartbeatLogService nodeHeartbeatLogService;
 
     @Value("${zookeeper.node.heartbeatInterval}")
     private long HEARTBEAT_INTERVAL;
     @Value("${zookeeper.node.heartbeatTimeout}")
     private long HEARTBEAT_TIMEOUT;
-
-    private String serviceName;
 
     /**
      * 心跳开始标志位
@@ -45,9 +46,7 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
     private Thread heartbeatThread;
 
     @Override
-    public void startHeartbeat(String serviceName) {
-        this.serviceName = serviceName;
-
+    public void startHeartbeat() {
         // 若已经开启心跳记录 则直接返回即可
         if (heartbeatFlag) {
             return;
@@ -83,11 +82,11 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
     private void initialServerHeartbeat() {
         // 根据名称先查出来
         LambdaQueryWrapper<BaseNodeHeartbeat> wrapper = new QueryWrapper<BaseNodeHeartbeat>()
-                .lambda().eq(BaseNodeHeartbeat::getServerName, serviceName);
+                .lambda().eq(BaseNodeHeartbeat::getServerName, node.getServiceName());
         BaseNodeHeartbeat nodeHeartbeat = baseMapper.selectOne(wrapper);
 
         if (nodeHeartbeat == null) {
-            nodeHeartbeat = new BaseNodeHeartbeat(serviceName, LocalDateTime.now());
+            nodeHeartbeat = new BaseNodeHeartbeat(node.getServiceName(), LocalDateTime.now());
             baseMapper.insert(nodeHeartbeat);
         }
     }
@@ -110,11 +109,13 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
      */
     private void initialHeartbeatTask() {
         while (true) {
-            // 更新服务心跳
-            updateServerHeartbeat(serviceName);
+            if (node.isLiving()) {
+                // 更新服务心跳
+                updateServerHeartbeat(node.getServiceName());
 
-            // 记录心跳日志流水
-            nodeHeartbeatLogService.appendHeartbeatLog(serviceName);
+                // 记录心跳日志流水
+                nodeHeartbeatLogService.appendHeartbeatLog(node.getServiceName());
+            }
 
             try {
                 Thread.sleep(HEARTBEAT_INTERVAL);

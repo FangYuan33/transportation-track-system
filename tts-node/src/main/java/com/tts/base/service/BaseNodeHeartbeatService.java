@@ -15,10 +15,8 @@ public interface BaseNodeHeartbeatService extends IService<BaseNodeHeartbeat> {
 
     /**
      * 开启节点心跳，按照配置的时间更新心跳时间并记录心跳日志流水
-     *
-     * @param serviceName 服务名称
      */
-    void startHeartbeat(String serviceName);
+    void startHeartbeat();
 
     /**
      * 获取所有符合条件服务名的心跳记录
