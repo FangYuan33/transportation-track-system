@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -88,9 +88,9 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         isLeader = new AtomicBoolean(false);
         // 服务节点名: IP:currentTime
         serviceName = IpUtils.getHostIp() + ":" + Time.currentElapsedTime();
+        TtsContext.setNodeServerName(serviceName);
         // treePath + serviceName
         currentNodePath = nodeProperties.getTreePath() + "/" + serviceName;
-        TtsContext.setNodeServerName(serviceName);
 
         RetryForever retryForever = new RetryForever(nodeProperties.getRetryCountInterval());
         curatorFramework = CuratorFrameworkFactory.newClient(nodeProperties.getAddress(),
@@ -267,19 +267,24 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     }
 
     /**
-     * 获取该路径下注册的所有IP
+     * 获取该路径下注册的所有服务名，只有Leader节点会调用该方法
      *
-     * etc: [treePath/serverName1, treePath/serverName2...]
+     * etc: [serverName1, serverName2...]
      */
-    public List<String> getServerIpList() {
+    public List<String> getServerNameList() {
         try {
             if (curatorFramework != null && CuratorFrameworkState.STARTED.equals(curatorFramework.getState())) {
-                return curatorFramework.getChildren().forPath(nodeProperties.getTreePath());
+                List<String> serverNames = curatorFramework.getChildren().forPath(nodeProperties.getTreePath());
+                // 移除主节点的服务名
+                serverNames.remove(serviceName);
+
+                return serverNames;
             }
-            return new ArrayList<>();
+            return Collections.emptyList();
         } catch (Exception e) {
             log.error("TTS Node getAllServerIpList error !!!", e);
-            return new ArrayList<>();
+
+            return Collections.emptyList();
         }
     }
 

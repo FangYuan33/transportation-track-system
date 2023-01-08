@@ -1,16 +1,19 @@
 package com.tts.iov.service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.tts.base.domain.BaseNodeHeartbeat;
 import com.tts.base.service.BaseNodeHeartbeatService;
 import com.tts.base.zookeeper.TtsZkNode;
+import com.tts.common.context.TtsContext;
+import com.tts.iov.domain.IovConfig;
 import com.tts.iov.domain.IovSubscribeTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static com.tts.iov.enums.IovSubscribeTaskStateEnums.*;
@@ -38,23 +41,57 @@ public class IovTaskRunnerService {
     private IovSubscribeTaskService iovSubscribeTaskService;
     @Autowired
     private BaseNodeHeartbeatService nodeHeartbeatService;
+    @Autowired
+    private IovConfigService iovConfigService;
 
+    @Value("${zookeeper.node.taskInterval}")
+    private long TASK_INTERVAL;
+
+    /**
+     * 启动节点任务执行
+     */
     public void start() {
+        // 初始化任务线程
+        Thread taskThread = new Thread(this::initialTask);
+        taskThread.setDaemon(true);
+        taskThread.setName("Node Task Thread");
 
+        // 启动
+        taskThread.start();
     }
 
+    /**
+     * 初始化任务
+     */
     private void initialTask() {
         while (true) {
             // leader节点负责检查心跳和分配任务
             if (node.getIsLeader().get()) {
-                // 心跳检测
-                checkHeartbeat();
-                // 分配任务
-
+                processLeaderTask();
             } else {
                 // 普通节点将被分配的任务设置为运行状态，启动任务线程
+                runningTask();
             }
 
+            try {
+                Thread.sleep(TASK_INTERVAL);
+            } catch (Exception e) {
+                log.error("Node Task sleep error", e);
+            }
+        }
+    }
+
+    /**
+     * leader节点的任务 心跳检测和分配任务
+     */
+    private void processLeaderTask() {
+        try {
+            // 心跳检测
+            checkHeartbeat();
+            // 分配任务
+            allocatingTask();
+        } catch (Exception e) {
+            log.error("Process Leader Task Error", e);
         }
     }
 
@@ -85,6 +122,43 @@ public class IovTaskRunnerService {
                     iovSubscribeTaskService.allocatingTask(task);
                 }
             }
+        }
+    }
+
+    /**
+     * 分配处于allocating 状态的任务
+     * todo: 后面需要 优化分配算法 为负载均衡的
+     */
+    private void allocatingTask() {
+        // 获取目前可用的serverIp列表
+        List<String> serverNameList = node.getServerNameList();
+        Random random = new Random();
+
+        // 拿出来所有待分配的任务
+        List<IovSubscribeTask> allocatingTasks = iovSubscribeTaskService.listAllocatingTask();
+
+        for (IovSubscribeTask task : allocatingTasks) {
+            // 将这个任务分配给随机一个服务
+            String serverName = serverNameList.get(random.nextInt(serverNameList.size()));
+            iovSubscribeTaskService.allocatedTask(task, serverName);
+        }
+    }
+
+    /**
+     * 将分配给当前节点的任务改成运行中
+     */
+    private void runningTask() {
+        try {
+            List<IovSubscribeTask> allocatedTasks = iovSubscribeTaskService.listCurrentNodeAllocatedTask();
+
+            for (IovSubscribeTask allocatedTask : allocatedTasks) {
+                IovConfig iovConfig = iovConfigService.getById(allocatedTask.getIovConfigId());
+                // 启动任务
+
+                iovSubscribeTaskService.runningTask(allocatedTask);
+            }
+        } catch (Exception e) {
+            log.error("Follower " + TtsContext.getNodeServerName() + " running task error", e);
         }
     }
 }

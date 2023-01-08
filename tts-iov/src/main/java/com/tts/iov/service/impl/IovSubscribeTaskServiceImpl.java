@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tts.common.context.TtsContext;
 import com.tts.common.exception.ServiceException;
 import com.tts.iov.dao.IovSubscribeTaskMapper;
 import com.tts.iov.domain.IovConfig;
@@ -143,5 +144,35 @@ public class IovSubscribeTaskServiceImpl extends ServiceImpl<IovSubscribeTaskMap
     public void allocatingTask(IovSubscribeTask task) {
         task.setState(ALLOCATING.getValue());
         baseMapper.updateById(task);
+    }
+
+    @Override
+    public List<IovSubscribeTask> listAllocatingTask() {
+        return baseMapper.selectList(new QueryWrapper<IovSubscribeTask>().lambda().eq(IovSubscribeTask::getState, ALLOCATING.getValue()));
+    }
+
+    @Override
+    public void allocatedTask(IovSubscribeTask task, String serverName) {
+        task.setServerName(serverName).setState(ALLOCATED.getValue());
+        baseMapper.updateById(task);
+
+        log.info("Task {} has been allocated!", JSONObject.toJSONString(task));
+    }
+
+    @Override
+    public List<IovSubscribeTask> listCurrentNodeAllocatedTask() {
+        LambdaQueryWrapper<IovSubscribeTask> queryWrapper = new QueryWrapper<IovSubscribeTask>().lambda()
+                .eq(IovSubscribeTask::getServerName, TtsContext.getNodeServerName())
+                .eq(IovSubscribeTask::getState, ALLOCATED.getValue());
+
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public void runningTask(IovSubscribeTask allocatedTask) {
+        allocatedTask.setState(RUNNING.getValue());
+        baseMapper.updateById(allocatedTask);
+
+        log.info("{} Task Is Running!", JSONObject.toJSONString(allocatedTask));
     }
 }
