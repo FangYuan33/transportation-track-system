@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
-@Service
+@Service(value = "G7")
 public class IovFacadeG7Impl implements IovFacade {
 
     private String baseUrl;
