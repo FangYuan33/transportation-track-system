@@ -5,11 +5,13 @@ import com.tts.base.domain.BaseNodeHeartbeat;
 import com.tts.base.service.BaseNodeHeartbeatService;
 import com.tts.base.zookeeper.TtsZkNode;
 import com.tts.common.context.TtsContext;
+import com.tts.common.utils.spring.BeanUtils;
 import com.tts.facade.dto.FacadeCoordinatePointResultDto;
 import com.tts.facade.dto.FacadeVehicleQueryDto;
 import com.tts.facade.enums.IovTypeEnums;
 import com.tts.iov.domain.IovSubscribeTask;
 import com.tts.iov.domain.IovSubscribeTaskVehicle;
+import com.tts.iov.domain.IovTrackPoint;
 import com.tts.iov.facade.FacadeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -52,6 +54,8 @@ public class IovTaskRunnerService {
     private BaseNodeHeartbeatService nodeHeartbeatService;
     @Autowired
     private FacadeService facadeService;
+    @Autowired
+    private IovTrackPointService iovTrackPointService;
 
     @Value("${zookeeper.node.taskInterval}")
     private long TASK_INTERVAL;
@@ -223,7 +227,8 @@ public class IovTaskRunnerService {
                 List<FacadeCoordinatePointResultDto> pointList = facadeService.queryIovVehicleTrackDirectly(queryDto);
 
                 // 点位入库
-
+                List<IovTrackPoint> points = BeanUtils.copyList(pointList, IovTrackPoint.class);
+                iovTrackPointService.saveOrUpdateBatch(points);
 
                 // 更新下次任务开始的时间
                 vehicleTask.setStartTime(queryDto.getTimeEnd());
