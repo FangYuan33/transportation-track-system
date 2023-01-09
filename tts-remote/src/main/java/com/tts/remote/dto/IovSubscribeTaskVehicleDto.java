@@ -1,6 +1,7 @@
 package com.tts.remote.dto;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class IovSubscribeTaskVehicleDto implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -10,6 +11,16 @@ public class IovSubscribeTaskVehicleDto implements Serializable {
     private String iovType;
 
     private String vehicleNo;
+
+    private LocalDateTime startTime;
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
 
     public String getCarrierCode() {
         return carrierCode;

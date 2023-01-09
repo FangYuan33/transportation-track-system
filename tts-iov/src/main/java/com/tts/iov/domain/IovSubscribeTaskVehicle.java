@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * 车辆订阅任务明细
  *
@@ -15,10 +17,10 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class IovSubscribeTaskVehicle extends BaseEntity {
-
-    public IovSubscribeTaskVehicle(Long taskId, String vehicleNo) {
+    public IovSubscribeTaskVehicle(Long taskId, String vehicleNo, LocalDateTime startTime) {
         this.taskId = taskId;
         this.vehicleNo = vehicleNo;
+        this.startTime = startTime;
     }
 
     /**
@@ -30,4 +32,9 @@ public class IovSubscribeTaskVehicle extends BaseEntity {
      * 车牌号
      */
     private String vehicleNo;
+
+    /**
+     * 点位拉取任务开始时间
+     */
+    private LocalDateTime startTime;
 }

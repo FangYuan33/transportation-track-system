@@ -12,7 +12,7 @@ public interface IovSubscribeTaskVehicleService extends IService<IovSubscribeTas
     /**
      * 添加车辆订阅任务
      */
-    boolean addVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto);
+    boolean saveOrUpdateVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto);
 
     /**
      * 移除车辆订阅任务

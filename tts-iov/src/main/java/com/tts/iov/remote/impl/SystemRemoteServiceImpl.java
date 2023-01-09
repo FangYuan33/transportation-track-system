@@ -49,8 +49,8 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     }
 
     @Override
-    public boolean addVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto) {
-        return iovSubscribeTaskVehicleService.addVehicleTask(taskVehicleDto);
+    public boolean saveOrUpdateVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto) {
+        return iovSubscribeTaskVehicleService.saveOrUpdateVehicleTask(taskVehicleDto);
     }
 
     @Override

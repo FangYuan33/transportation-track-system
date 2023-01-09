@@ -30,21 +30,21 @@ public class IovSubscribeTaskVehicleServiceImpl extends ServiceImpl<IovSubscribe
     private IovSubscribeTaskService iovSubscribeTaskService;
 
     @Override
-    public boolean addVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto) {
-        return processAddOrDelete(taskVehicleDto, true);
+    public boolean saveOrUpdateVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto) {
+        return processSaveOrUpdateOrDelete(taskVehicleDto, true);
     }
 
     @Override
     public boolean removeVehicleTask(IovSubscribeTaskVehicleDto taskVehicleDto) {
-        return processAddOrDelete(taskVehicleDto, false);
+        return processSaveOrUpdateOrDelete(taskVehicleDto, false);
     }
 
     /**
      * 执行增加或删除逻辑
      *
-     * @param isAdd 是否是增加逻辑
+     * @param isAdd 是否是增加或修改逻辑
      */
-    private boolean processAddOrDelete(IovSubscribeTaskVehicleDto taskVehicleDto, boolean isAdd) {
+    private boolean processSaveOrUpdateOrDelete(IovSubscribeTaskVehicleDto taskVehicleDto, boolean isAdd) {
         IovConfig iovConfig = iovConfigService.getByIovType(taskVehicleDto.getIovType());
         if (iovConfig == null) {
             throw new ServiceException("TTS Iov Config [" + taskVehicleDto.getIovType() + "] Not Found!");
@@ -59,7 +59,7 @@ public class IovSubscribeTaskVehicleServiceImpl extends ServiceImpl<IovSubscribe
 
         // 处理业务逻辑
         if (isAdd) {
-            return processAddVehicleTask(subscribeTask, taskVehicleDto.getVehicleNo());
+            return processSaveOrUpdateVehicleTask(subscribeTask, taskVehicleDto);
         } else {
             return processDeleteVehicleTask(subscribeTask, taskVehicleDto.getVehicleNo());
         }
@@ -68,17 +68,21 @@ public class IovSubscribeTaskVehicleServiceImpl extends ServiceImpl<IovSubscribe
     /**
      * 处理新增车辆任务逻辑
      */
-    private boolean processAddVehicleTask(IovSubscribeTask subscribeTask, String vehicleNo) {
-        IovSubscribeTaskVehicle taskVehicle = selectByTaskIdAndVehicleNo(subscribeTask.getId(), vehicleNo);
+    private boolean processSaveOrUpdateVehicleTask(IovSubscribeTask subscribeTask, IovSubscribeTaskVehicleDto taskVehicleDto) {
+        IovSubscribeTaskVehicle taskVehicle = selectByTaskIdAndVehicleNo(subscribeTask.getId(), taskVehicleDto.getVehicleNo());
         if (taskVehicle == null) {
-            taskVehicle = new IovSubscribeTaskVehicle(subscribeTask.getId(), vehicleNo);
+            taskVehicle = new IovSubscribeTaskVehicle(subscribeTask.getId(), taskVehicleDto.getVehicleNo(), taskVehicleDto.getStartTime());
             baseMapper.insert(taskVehicle);
 
             log.info("Carrier: {} Start Task Vehicle: {}", subscribeTask.getCarrierCode(), JSONObject.toJSONString(taskVehicle));
             return true;
-        }
+        } else {
+            taskVehicle.setStartTime(taskVehicleDto.getStartTime());
+            baseMapper.updateById(taskVehicle);
 
-        return false;
+            log.info("Carrier: {} Update Task Vehicle: {}", subscribeTask.getCarrierCode(), JSONObject.toJSONString(taskVehicle));
+            return true;
+        }
     }
 
     private IovSubscribeTaskVehicle selectByTaskIdAndVehicleNo(Long taskId, String vehicleNo) {
