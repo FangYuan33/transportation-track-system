@@ -59,6 +59,19 @@ public class IovTaskRunnerService {
 
     @Value("${zookeeper.node.taskInterval}")
     private long TASK_INTERVAL;
+    @Value("${zookeeper.node.followerNodeTaskInterval}")
+    private long FOLLOWER_NODE_TASK_INTERVAL;
+    @Value("${zookeeper.node.trackInterval}")
+    private long TRACK_INTERVAL;
+
+    /**
+     * 普通节点任务线程
+     */
+    private Thread followerNodeThread = null;
+    /**
+     * 普通节点任务的起止控制标志位
+     */
+    private volatile boolean followerNodeThreadFlag = false;
 
     /**
      * 启动节点任务执行
@@ -80,6 +93,7 @@ public class IovTaskRunnerService {
         while (true) {
             // leader节点负责检查心跳和分配任务
             if (node.getIsLeader().get()) {
+                closeFollowerThread();
                 processLeaderTask();
             } else {
                 // 普通节点将被分配的任务设置为运行状态，启动任务线程
@@ -87,10 +101,21 @@ public class IovTaskRunnerService {
             }
 
             try {
-                Thread.sleep(TASK_INTERVAL);
+                Thread.sleep(TASK_INTERVAL * 1000);
             } catch (Exception e) {
                 log.error("Node Task sleep error", e);
             }
+        }
+    }
+
+    /**
+     * 如果之前是普通节点，但是现在成了leader节点，则需要关闭普通节点任务线程
+     */
+    private void closeFollowerThread() {
+        if (followerNodeThread != null && followerNodeThread.isAlive()) {
+            followerNodeThreadFlag = false;
+
+            followerNodeThread = null;
         }
     }
 
@@ -115,7 +140,7 @@ public class IovTaskRunnerService {
      */
     private void checkHeartbeat() {
         // 查询当前有任务运行的节点信息
-        List<IovSubscribeTask> runningTasks = iovSubscribeTaskService.listRunningTask();
+        List<IovSubscribeTask> runningTasks = iovSubscribeTaskService.listAllocatedAndRunningTask();
 
         if (CollectionUtils.isNotEmpty(runningTasks)) {
             // 获取所有正在运行任务上挂的服务
@@ -181,14 +206,36 @@ public class IovTaskRunnerService {
      * 将分配给当前节点的任务改成运行中
      */
     private void runningTask() {
-        try {
-            // 将已分配的任务更新为运行中
-            updateRunningState();
+        if (followerNodeThread == null) {
+            followerNodeThread = new Thread(this::initialFollowerNodeThreadTask);
+            followerNodeThread.setDaemon(true);
+            followerNodeThread.setName("Follower Node Thread");
+            followerNodeThreadFlag = true;
 
-            // 执行运行中的任务
-            doRunningTask();
-        } catch (Exception e) {
-            log.error("Follower " + TtsContext.getNodeServerName() + " running task error", e);
+            followerNodeThread.start();
+        }
+    }
+
+    /**
+     * 初始化普通节点线程任务
+     */
+    private void initialFollowerNodeThreadTask() {
+        while (followerNodeThreadFlag) {
+            try {
+                // 将已分配的任务更新为运行中
+                updateRunningState();
+
+                // 执行运行中的任务
+                doRunningTask();
+            } catch (Exception e) {
+                log.error("Follower " + TtsContext.getNodeServerName() + " running task error", e);
+            }
+
+            try {
+                Thread.sleep(FOLLOWER_NODE_TASK_INTERVAL * 1000 * 60);
+            } catch (Exception e) {
+                log.error("Follower Node Thread Sleep Error", e);
+            }
         }
     }
 
@@ -248,9 +295,12 @@ public class IovTaskRunnerService {
         String iovType = iovSubscribeTaskVehicleService.getIovTypeById(vehicleTask.getId());
         queryDto.setIovTypeEnum(IovTypeEnums.parse(iovType));
         queryDto.setVehicleNo(vehicleTask.getVehicleNo());
-        // 指定轨迹查询的起止时间
+        // 指定轨迹查询的起止时间，endTime不能超过当前时间
         queryDto.setTimeStart(vehicleTask.getStartTime());
-        LocalDateTime endTime = vehicleTask.getStartTime().plusMinutes(60);
+        LocalDateTime endTime = vehicleTask.getStartTime().plusHours(TRACK_INTERVAL);
+        if (LocalDateTime.now().isBefore(endTime)) {
+            endTime = LocalDateTime.now();
+        }
         queryDto.setTimeEnd(endTime);
 
         return queryDto;

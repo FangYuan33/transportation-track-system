@@ -192,4 +192,12 @@ public class IovSubscribeTaskServiceImpl extends ServiceImpl<IovSubscribeTaskMap
 
         return baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<IovSubscribeTask> listAllocatedAndRunningTask() {
+        LambdaQueryWrapper<IovSubscribeTask> queryWrapper = new QueryWrapper<IovSubscribeTask>().lambda()
+                .in(IovSubscribeTask::getState, Arrays.asList(ALLOCATED.getValue(), RUNNING.getValue()));
+
+        return baseMapper.selectList(queryWrapper);
+    }
 }

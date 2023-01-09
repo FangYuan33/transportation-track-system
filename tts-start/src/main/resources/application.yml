@@ -73,8 +73,12 @@ zookeeper:
     heartbeatInterval: 10000
     # 节点心跳超时时间 s
     heartbeatTimeout: 60
-    # 执行节点任务的间隔时间 ms
-    taskInterval: 10000
+    # 执行节点任务的间隔时间 s
+    taskInterval: 10
+    # 普通节点任务执行间隔 min
+    followerNodeTaskInterval: 1
+    # 轨迹查询时间间隔 h
+    trackInterval: 1
 
 dubbo:
   application:

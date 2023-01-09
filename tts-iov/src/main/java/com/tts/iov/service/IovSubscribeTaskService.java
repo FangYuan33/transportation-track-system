@@ -64,4 +64,9 @@ public interface IovSubscribeTaskService {
      * 获取当前节点的已分配和运行的任务
      */
     List<IovSubscribeTask> listCurrentNodeAllocatedAndRunningTask();
+
+    /**
+     * 获取所有已分配的任务
+     */
+    List<IovSubscribeTask> listAllocatedAndRunningTask();
 }
