@@ -6,7 +6,7 @@
         select ic.iov_type
         from iov_subscribe_task_vehicle istv
         left join iov_subscribe_task ist on istv.task_id = ist.id
-        left join iov_config ic on ic.id = ist.iov_config
+        left join iov_config ic on ic.id = ist.iov_config_id
         where istv.id = #{id}
     </select>
 </mapper>
