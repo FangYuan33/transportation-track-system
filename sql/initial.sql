@@ -59,3 +59,20 @@ CREATE TABLE `iov_subscribe_task_vehicle`
     `update_time` datetime    NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB COMMENT='Iov任务车辆订阅明细表';
+
+CREATE TABLE `iov_track_point`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT,
+    `vehicle_no`  varchar(20) NOT NULL COMMENT '车牌号',
+    `latitude`    varchar(20) NOT NULL COMMENT '纬度',
+    `longitude`   varchar(20) NOT NULL COMMENT '经度',
+    `speed`       varchar(20) default NULL COMMENT '速度',
+    `direction`   varchar(20) default NULL COMMENT '方向',
+    `altitude`    varchar(20) default NULL COMMENT '海拔高度',
+    `address`     varchar(20) default NULL COMMENT '地址',
+    `time`        varchar(20) default NULL COMMENT '定位时间',
+    `create_time` datetime    NOT NULL COMMENT '创建时间',
+    `update_time` datetime    NOT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`)
+        USING BTREE
+) ENGINE = InnoDB COMMENT = '车辆点位表';
