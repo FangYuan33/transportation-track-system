@@ -3,6 +3,8 @@ package com.tts.iov.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tts.common.context.TtsContext;
 import com.tts.common.exception.ServiceException;
@@ -12,6 +14,7 @@ import com.tts.iov.domain.IovSubscribeTask;
 import com.tts.iov.service.IovConfigService;
 import com.tts.iov.service.IovSubscribeTaskService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -170,11 +173,15 @@ public class IovSubscribeTaskServiceImpl extends ServiceImpl<IovSubscribeTaskMap
     }
 
     @Override
-    public void runningTask(IovSubscribeTask allocatedTask) {
-        allocatedTask.setState(RUNNING.getValue());
-        baseMapper.updateById(allocatedTask);
+    public void runningTask(List<Long> ids) {
+        if (CollectionUtils.isNotEmpty(ids)) {
+            LambdaUpdateWrapper<IovSubscribeTask> updateWrapper = new UpdateWrapper<IovSubscribeTask>().lambda()
+                    .set(IovSubscribeTask::getState, RUNNING.getValue())
+                    .in(IovSubscribeTask::getId, ids);
+            baseMapper.update(null, updateWrapper);
 
-        log.info("{} Task Is Running!", JSONObject.toJSONString(allocatedTask));
+            log.info("{} Task Is Running!", JSONObject.toJSONString(ids));
+        }
     }
 
     @Override

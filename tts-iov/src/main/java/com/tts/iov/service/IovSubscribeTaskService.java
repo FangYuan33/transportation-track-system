@@ -55,8 +55,10 @@ public interface IovSubscribeTaskService {
 
     /**
      * 启动已分配的任务
+     *
+     * @param ids 将所有id的任务改为运行中
      */
-    void runningTask(IovSubscribeTask allocatedTask);
+    void runningTask(List<Long> ids);
 
     /**
      * 获取当前节点的已分配和运行的任务

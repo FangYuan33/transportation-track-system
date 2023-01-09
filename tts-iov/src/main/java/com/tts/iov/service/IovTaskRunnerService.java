@@ -1,17 +1,24 @@
 package com.tts.iov.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tts.base.domain.BaseNodeHeartbeat;
 import com.tts.base.service.BaseNodeHeartbeatService;
 import com.tts.base.zookeeper.TtsZkNode;
 import com.tts.common.context.TtsContext;
-import com.tts.iov.domain.IovConfig;
+import com.tts.facade.dto.FacadeCoordinatePointResultDto;
+import com.tts.facade.dto.FacadeVehicleQueryDto;
+import com.tts.facade.enums.IovTypeEnums;
 import com.tts.iov.domain.IovSubscribeTask;
+import com.tts.iov.domain.IovSubscribeTaskVehicle;
+import com.tts.iov.facade.FacadeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -40,9 +47,11 @@ public class IovTaskRunnerService {
     @Autowired
     private IovSubscribeTaskService iovSubscribeTaskService;
     @Autowired
+    private IovSubscribeTaskVehicleService iovSubscribeTaskVehicleService;
+    @Autowired
     private BaseNodeHeartbeatService nodeHeartbeatService;
     @Autowired
-    private IovConfigService iovConfigService;
+    private FacadeService facadeService;
 
     @Value("${zookeeper.node.taskInterval}")
     private long TASK_INTERVAL;
@@ -104,7 +113,7 @@ public class IovTaskRunnerService {
         // 查询当前有任务运行的节点信息
         List<IovSubscribeTask> runningTasks = iovSubscribeTaskService.listRunningTask();
 
-        if (!runningTasks.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(runningTasks)) {
             // 获取所有正在运行任务上挂的服务
             List<String> serverNames = runningTasks.stream().map(IovSubscribeTask::getServerName).collect(Collectors.toList());
             // 获取所有服务的心跳时间
@@ -118,7 +127,7 @@ public class IovTaskRunnerService {
             }
 
             // 剩下心跳超时的节点，将其上的未完成的任务全部标记为待分配
-            if (!serverNames.isEmpty()) {
+            if (CollectionUtils.isNotEmpty(serverNames)) {
                 List<IovSubscribeTask> timeOutTask = iovSubscribeTaskService.listByServerNames(serverNames);
                 for (IovSubscribeTask task : timeOutTask) {
                     if (ALLOCATED.getValue().equals(task.getState()) || RUNNING.getValue().equals(task.getState())) {
@@ -150,7 +159,7 @@ public class IovTaskRunnerService {
         List<String> serverNameList = node.getServerNameList();
 
         // 有子节点才进行任务分配
-        if (!serverNameList.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(serverNameList)) {
             Random random = new Random();
 
             // 拿出来所有待分配的任务
@@ -169,16 +178,76 @@ public class IovTaskRunnerService {
      */
     private void runningTask() {
         try {
-            List<IovSubscribeTask> allocatedTasks = iovSubscribeTaskService.listCurrentNodeAllocatedTask();
+            // 将已分配的任务更新为运行中
+            updateRunningState();
 
-            for (IovSubscribeTask allocatedTask : allocatedTasks) {
-                IovConfig iovConfig = iovConfigService.getById(allocatedTask.getIovConfigId());
-                // 启动任务
-
-                iovSubscribeTaskService.runningTask(allocatedTask);
-            }
+            // 执行运行中的任务
+            doRunningTask();
         } catch (Exception e) {
             log.error("Follower " + TtsContext.getNodeServerName() + " running task error", e);
         }
+    }
+
+    /**
+     * 更新为运行状态
+     */
+    private void updateRunningState() {
+        List<IovSubscribeTask> allocatedTasks = iovSubscribeTaskService.listCurrentNodeAllocatedTask();
+        List<Long> idList = allocatedTasks.stream().map(IovSubscribeTask::getId).collect(Collectors.toList());
+
+        iovSubscribeTaskService.runningTask(idList);
+    }
+
+    /**
+     * 节点执行点位拉取任务
+     */
+    private void doRunningTask() {
+        List<IovSubscribeTask> runningTask = iovSubscribeTaskService.listRunningTask();
+        // 获取运行中任务的ID
+        List<Long> taskIdList = runningTask.stream().map(IovSubscribeTask::getId).collect(Collectors.toList());
+        // 所有车辆任务
+        List<IovSubscribeTaskVehicle> vehicleTasks = iovSubscribeTaskVehicleService.listInTaskIdList(taskIdList);
+
+        // 执行车辆任务
+        processVehicleTask(vehicleTasks);
+    }
+
+    /**
+     * 执行车辆任务
+     */
+    private void processVehicleTask(List<IovSubscribeTaskVehicle> vehicleTasks) {
+        for (IovSubscribeTaskVehicle vehicleTask : vehicleTasks) {
+            try {
+                // 查询点位
+                FacadeVehicleQueryDto queryDto = initialTrackPointListQueryParam(vehicleTask);
+                List<FacadeCoordinatePointResultDto> pointList = facadeService.queryIovVehicleTrackDirectly(queryDto);
+
+                // 点位入库
+
+
+                // 更新下次任务开始的时间
+                vehicleTask.setStartTime(queryDto.getTimeEnd());
+                iovSubscribeTaskVehicleService.updateByEntity(vehicleTask);
+            } catch (Exception e) {
+                log.error("Task: " + JSONObject.toJSONString(vehicleTask) + " save point list error", e);
+            }
+        }
+    }
+
+    /**
+     * 初始化轨迹查询参数
+     */
+    private FacadeVehicleQueryDto initialTrackPointListQueryParam(IovSubscribeTaskVehicle vehicleTask) {
+        FacadeVehicleQueryDto queryDto = new FacadeVehicleQueryDto();
+        // iov设备类型
+        String iovType = iovSubscribeTaskVehicleService.getIovTypeById(vehicleTask.getId());
+        queryDto.setIovTypeEnum(IovTypeEnums.parse(iovType));
+        queryDto.setVehicleNo(vehicleTask.getVehicleNo());
+        // 指定轨迹查询的起止时间
+        queryDto.setTimeStart(vehicleTask.getStartTime());
+        LocalDateTime endTime = vehicleTask.getStartTime().plusMinutes(60);
+        queryDto.setTimeEnd(endTime);
+
+        return queryDto;
     }
 }

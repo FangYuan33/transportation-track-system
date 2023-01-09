@@ -16,8 +16,12 @@ import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.iov.service.IovSubscribeTaskVehicleService;
 import com.tts.remote.dto.IovSubscribeTaskVehicleDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -108,5 +112,27 @@ public class IovSubscribeTaskVehicleServiceImpl extends ServiceImpl<IovSubscribe
         } else {
             return false;
         }
+    }
+
+    @Override
+    public List<IovSubscribeTaskVehicle> listInTaskIdList(List<Long> taskIdList) {
+        if (CollectionUtils.isNotEmpty(taskIdList)) {
+            LambdaQueryWrapper<IovSubscribeTaskVehicle> queryWrapper = new QueryWrapper<IovSubscribeTaskVehicle>()
+                    .lambda().in(IovSubscribeTaskVehicle::getTaskId, taskIdList);
+
+            return baseMapper.selectList(queryWrapper);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public String getIovTypeById(Long id) {
+        return baseMapper.getIovTypeById(id);
+    }
+
+    @Override
+    public void updateByEntity(IovSubscribeTaskVehicle vehicleTask) {
+        baseMapper.updateById(vehicleTask);
     }
 }

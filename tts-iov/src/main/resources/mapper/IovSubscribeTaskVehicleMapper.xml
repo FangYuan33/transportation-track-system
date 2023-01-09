@@ -2,4 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.tts.iov.dao.IovSubscribeTaskVehicleMapper">
 
+    <select id="getIovTypeById" resultType="String">
+        select ic.iov_type
+        from iov_subscribe_task_vehicle istv
+        left join iov_subscribe_task ist on istv.task_id = ist.id
+        left join iov_config ic on ic.id = ist.iov_config
+        where istv.id = #{id}
+    </select>
 </mapper>
