@@ -1,31 +1,84 @@
-## TTS
+## Transportation Track System
 
-## 1. TTS组件MAVEN依赖图
+## 1. 它能干什么事儿？
+1. **查询不同GPS设备当前实时车辆轨迹和车辆位置**，直接在参数上指定对应的GPS设备枚举即可
+2. **订阅车辆轨迹记录任务**，将对应车辆的点位保存，以供查看历史轨迹
 
-![](images/新tts依赖关系.jpg)
+### 1.1 策略模式在轨迹查询中的应用
+系统中有多种GPS设备服务，每种服务都有对应的实现，采用**策略模式**来解决服务调用时能够分配到所需的服务类型
 
-- `tts-start`: 轨迹服务启动模块，包含启动类和一些必要的ApplicationRunner
-- `tts-node`: 轨迹服务节点模块，主要是关于节点的功能：节点的配置和和心跳记录
-- `tts-remote`: Dubbo RPC 接口模块，供其他项目依赖、调用
-- `tts-facade`: GPS设备接口模块，提供不同设备的查询方法
-- `tts-framework`: 框架支持，包含一些配置
-- `tts-common`: 通用的枚举和工具类等...
+```java
+@Service
+public class GpsService implements InitializingBean {
 
-其中图示上方为轨迹业务不同的实现，分别放在了不同的module里
+    /**
+     * key: iovTypeName value: service
+     */
+    private Map<String, IovGps> gpsServiceMap;
 
-- `tcsp-component-tts-remote`: 这个主要是开放一些通用的方法，达成jar包后供其他系统依赖使用
-- `tcsp-component-tts-iov`: 车联网通用接口层，定义了三个通用的方法：
-  **初始化属性**，**车辆最新位置**、**车辆轨迹信息** 以供具体业务做不同的实现；
-  另外还使用了**工厂模式**，不同的轨迹业务服务（g7、中交兴路）没有被Spring管理起来，
-  而是每次这些接口被调用时用工厂模式创建对象
-- `tcsp-component-tts-iov-sinoiov`、`tcsp-component-tts-iov-g7`:
-  分别为中交兴路，和g7轨迹业务的具体方法实现
+    @Override
+    public void afterPropertiesSet() {
+        // 将所有的GPS类型bean封装起来，根据策略模式按需取
+        gpsServiceMap = SpringUtils.getBeansOfType(IovGps.class);
+    }
+}
+```
 
-问题
+1. 定义Map对所有服务实现类进行管理，实现`InitializingBean`接口，在bean初始化时使用**依赖查找**把实现类都封装在Map中，
+   其中`IovGps`是所有Gps实现类都要实现的通用接口
+    
+2. Map保存数据的形式: key为Gps设备类型名，value为对应的服务实现类，这样就可以把设备名服务一一对应上，
+   需要注意的是要在具体实现类指定bean的名字为对应类型名，如下
+   ```java
+   @Service(value = "G7")
+   public class IovGpsG7Impl implements IovGps {
+    // ...
+   }
+   ```
+   
+3. 当要获取具体的类型时，直接传入枚举值即可
+```java
+@Service
+public class GpsService implements InitializingBean {
 
-## 2. TTS服务
-### 2.1 TTS节点
-#### 2.1.1 实现原理
+    // ...
+    
+    /**
+     * 获取具体业务类型的服务对象
+     */
+    public IovGps getSpecificService(IovTypeEnums iovTypeEnum) {
+        if (iovTypeEnum != null) {
+            Set<String> keySet = gpsServiceMap.keySet();
+            for (String beanName : keySet) {
+                if (beanName.contains(iovTypeEnum.getValue())) {
+                    return gpsServiceMap.get(beanName);
+                }
+            }
+
+            throw new ServiceException("不支持" + iovTypeEnum.getValue() + "类型查询");
+        }
+
+        throw new ServiceException("参数异常");
+    }
+}
+```
+
+- **使用策略模式的优势**: 遵守**开闭原则**，使得在新增任何GPS类型实现时，都无需对代码进行改动，它会自动进行封装，在需要时提供服务
+
+#### 1.1.1 调用流程
+![](images/ttsG7业务图.jpg)
+
+
+### 1.2 车辆订阅任务的执行与分配
+
+TTS采用**多节点集群模式**进行部署，节点中角色分为`Leader`和`Follower`，其中`Leader`的职责是**检查各个服务的心跳时间**和**分配订阅任务**给`Follower`节点，
+而`Follower`节点则负责执行订阅任务
+
+1. **集群高可用**: 借助zookeeper实现，依赖zookeeper提供的选举来分配各个节点的角色，保证集群的高可用
+2. **订阅任务的高可用**: 每个节点服务都会在规定时间内记录节点心跳，`Leader`节点会检查心跳，若某节点心跳超时，
+   则会将该节点上**没有结束的任务**重新分配给其他`Follower`节点，以保证订阅任务的高可用
+   
+#### 1.2.1 实现原理
 ![](images/TTS组件实现原理类图.jpg)
 
 - **LeaderSelectorListenerAdapter**: 实现节点的选举，分出Leader和Follower节点负责不同的职责
@@ -36,29 +89,18 @@
 
 - **BaseNodeHeartbeatService**: 服务节点心跳服务，随服务启动，每隔N秒更新服务节点心跳并记录心跳流水
 
-#### 2.1.2 类型及其职责
+## 2. Maven依赖关系
 
-- **Leader**: 负责分配任务和检查从节点任务的心跳状态
-- **Follower**: 执行任务和更新任务的状态
+![](images/新tts依赖关系.jpg)
 
-### 2.2 集群服务高可用
+- `tts-start`: 轨迹服务启动模块，包含启动类和一些必要的`ApplicationRunner`，其中`ApplicationRunner`包括`NodeRunner`和`NodeTaskRunner`，
+  前者负责初始化节点信息并将节点交由zookeeper进行管理，后者负责执行节点任务   
+- `tts-iov`: 轨迹服务核心模块，定义了节点任务的执行逻辑，包含GPS配置服务、任务订阅服务以及对点位处理的服务等
+- `tts-node`: 轨迹服务节点模块，都是关于节点的功能：节点的配置、心跳记录等
+- `tts-gps`: GPS设备接口模块，提供不同设备的轨迹、点位查询服务，使用策略模式将多种服务封装，在调用时根据枚举自动匹配GPS服务
+- `tts-remote`: Dubbo RPC 接口模块，供其他项目依赖、调用接口查询点位和订阅任务
+- `tts-framework`: 框架支持，包含一些配置
+- `tts-common`: 通用的枚举和工具类等
 
-使用zookeeper来实现对集群中节点的管理，并记录服务节点心跳来判断服务的可用性
-
-### 2.3 任务的高可用
-心跳机制
-
-## 3. TTS开放接口
-### 3.1 外部轨迹服务接入（G7）
-
-![](images/ttsG7业务图.jpg)
-
-1. `SystemRemoteService`开放通用接口方法供其他服务调用，
-   将`tcsp-component-tts-remote`打成jar包，其他项目进行依赖即可
-2. `SystemRemoteServiceImpl`实现`SystemRemoteService`做具体方法实现，
-   依赖TTS轨迹服务
-3. 在TTS轨迹服务`TtsIovSubscribeTaskService`中，调用`IovFactory`的工厂方法，
-   根据**配置的轨迹业务不同创建不同的轨迹业务服务**。
-   但是轨迹服务调用查询轨迹、车辆位置的方法时，每次都会调用一次工厂方法，创建对象。
-
-### 3.2 APP轨迹服务接入
+---
+**That's all.**
