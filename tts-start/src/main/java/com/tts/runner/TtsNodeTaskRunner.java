@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class TtsApplicationRunner implements ApplicationRunner {
+public class TtsNodeTaskRunner implements ApplicationRunner {
 
     @Autowired
     private IovConfigService iovConfigService;
