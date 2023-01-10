@@ -65,12 +65,12 @@ public class GpsService implements InitializingBean {
 }
 ```
 
-- **优势**: 使用策略模式的遵守了**开闭原则**，使得在新增任何GPS类型实现时，都无需对原有代码进行改动，只需开发新的GPS服务即可，它会自动进行封装，在需要时提供服务
+- **优势**: 使用策略模式遵守**开闭原则**，使得在新增任何GPS类型实现时，都无需对原有代码进行改动，只需开发新的GPS服务即可，它会自动进行封装，在需要时提供服务
 
 #### 2.1.1 调用流程
 ![](images/ttsG7业务图.jpg)
 
-`SystemRemoteService`被其他项目依赖，作为dubbo接口注入，在它的实现类中包含`GpsService`，这里使用了上述的策略模式，
+`SystemRemoteService`被其他项目依赖，作为dubbo接口注入，它的实现类中包含`GpsService`，这里使用了上述的策略模式，
 包含具体Gps设备类型的实现，易扩展
 
 ### 2.2 车辆订阅任务的执行与分配
