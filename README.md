@@ -68,26 +68,28 @@ public class GpsService implements InitializingBean {
 #### 1.1.1 调用流程
 ![](images/ttsG7业务图.jpg)
 
+`SystemRemoteService`被其他项目依赖，作为dubbo接口注入，在它的实现类中包含`GpsService`，这里使用了上述的策略模式，
+包含具体Gps设备类型的实现，易扩展
 
 ### 1.2 车辆订阅任务的执行与分配
 
-TTS采用**多节点集群模式**进行部署，节点中角色分为`Leader`和`Follower`，其中`Leader`的职责是**检查各个服务的心跳时间**和**分配订阅任务**给`Follower`节点，
-而`Follower`节点则负责执行订阅任务
+TTS采用**多节点集群模式**部署，节点中角色分为`Leader`和`Follower`，其中`Leader`的职责是**检查各个服务的心跳时间**和**分配订阅任务**给`Follower`节点，
+而`Follower`节点则负责执行订阅任务，集群、订阅任务的高可用保证了服务正常运行。
 
-1. **集群高可用**: 借助zookeeper实现，依赖zookeeper提供的选举来分配各个节点的角色，保证集群的高可用
+1. **集群高可用**: 借助zookeeper实现，依赖zookeeper提供的选举来**分配各个节点的角色**，保证集群的高可用
 2. **订阅任务的高可用**: 每个节点服务都会在规定时间内记录节点心跳，`Leader`节点会检查心跳，若某节点心跳超时，
    则会将该节点上**没有结束的任务**重新分配给其他`Follower`节点，以保证订阅任务的高可用
    
 #### 1.2.1 实现原理
 ![](images/TTS组件实现原理类图.jpg)
 
-- **LeaderSelectorListenerAdapter**: 实现节点的选举，分出Leader和Follower节点负责不同的职责
-- **InitializingBean**: 初始化节点中的必要信息
-- **Closeable**: 为了调用`close()`方法优雅的释放资源
+TTS节点实现如下接口
+- **LeaderSelectorListenerAdapter**: 以此来借助zookeeper实现节点的选举和集群高可用，分出`Leader`和`Follower`节点负责不同的职责
+- **InitializingBean**: 服务启动时，初始化节点中的必要配置信息
+- **Closeable**: 为了调用`close()`方法优雅的释放节点资源
 
-`TtsNodeRunner`实现`ApplicationRunner`随服务启动，调用节点的启动方法，让zookeeper帮忙分配角色
-
-- **BaseNodeHeartbeatService**: 服务节点心跳服务，随服务启动，每隔N秒更新服务节点心跳并记录心跳流水
+`TtsNodeRunner`是节点服务的启动类，实现`ApplicationRunner`会随服务启动，
+其中包含`BaseNodeHeartbeatService`服务节点心跳服务，每隔N秒更新服务节点心跳并记录心跳流水，保证订阅任务的高可用
 
 ## 2. Maven依赖关系
 
