@@ -1,7 +1,7 @@
 package com.tts.runner;
 
 import com.tts.iov.service.IovConfigService;
-import com.tts.iov.service.IovTaskRunnerService;
+import com.tts.iov.task.IovTaskRunnerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;

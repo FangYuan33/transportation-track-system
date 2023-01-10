@@ -1,4 +1,4 @@
-package com.tts.iov.service;
+package com.tts.iov.task;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tts.base.domain.BaseNodeHeartbeat;
@@ -13,6 +13,9 @@ import com.tts.iov.domain.IovSubscribeTask;
 import com.tts.iov.domain.IovSubscribeTaskVehicle;
 import com.tts.iov.domain.IovTrackPoint;
 import com.tts.gps.GpsService;
+import com.tts.iov.service.IovSubscribeTaskService;
+import com.tts.iov.service.IovSubscribeTaskVehicleService;
+import com.tts.iov.service.IovTrackPointService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
