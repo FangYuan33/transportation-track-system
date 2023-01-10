@@ -11,7 +11,7 @@ import com.tts.gps.enums.IovTypeEnums;
 import com.tts.gps.service.IovGps;
 import com.tts.iov.dao.IovConfigMapper;
 import com.tts.iov.domain.IovConfig;
-import com.tts.iov.gps.GpsService;
+import com.tts.gps.GpsService;
 import com.tts.iov.service.IovConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

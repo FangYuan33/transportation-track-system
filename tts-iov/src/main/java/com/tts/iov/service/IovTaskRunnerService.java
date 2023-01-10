@@ -12,7 +12,7 @@ import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovSubscribeTask;
 import com.tts.iov.domain.IovSubscribeTaskVehicle;
 import com.tts.iov.domain.IovTrackPoint;
-import com.tts.iov.gps.GpsService;
+import com.tts.gps.GpsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

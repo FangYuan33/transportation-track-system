@@ -1,4 +1,4 @@
-package com.tts.iov.gps;
+package com.tts.gps;
 
 import com.tts.common.exception.ServiceException;
 import com.tts.common.utils.spring.SpringUtils;
@@ -13,6 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 调用GPS服务时，注入这个Bean即可
+ * <p>
+ * 使用了策略模式，在具体调用处不用关注具体的类型，在这里会做出具体的Service分配
+ * 避免了在使用时不清楚调用哪个类型或需要注入多种GpsService的困扰
+ */
 @Service
 public class GpsService implements InitializingBean {
 

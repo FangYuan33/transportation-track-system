@@ -5,7 +5,7 @@ import com.tts.gps.dto.GpsCoordinatePointResultDto;
 import com.tts.gps.dto.GpsVehicleQueryDto;
 import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovConfig;
-import com.tts.iov.gps.GpsService;
+import com.tts.gps.GpsService;
 import com.tts.iov.service.IovConfigService;
 import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.iov.service.IovSubscribeTaskVehicleService;
