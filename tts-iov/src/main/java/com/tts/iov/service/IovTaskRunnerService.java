@@ -6,13 +6,13 @@ import com.tts.base.service.BaseNodeHeartbeatService;
 import com.tts.base.zookeeper.TtsZkNode;
 import com.tts.common.context.TtsContext;
 import com.tts.common.utils.spring.BeanUtils;
-import com.tts.facade.dto.FacadeCoordinatePointResultDto;
-import com.tts.facade.dto.FacadeVehicleQueryDto;
-import com.tts.facade.enums.IovTypeEnums;
+import com.tts.gps.dto.GpsCoordinatePointResultDto;
+import com.tts.gps.dto.GpsVehicleQueryDto;
+import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovSubscribeTask;
 import com.tts.iov.domain.IovSubscribeTaskVehicle;
 import com.tts.iov.domain.IovTrackPoint;
-import com.tts.iov.facade.FacadeService;
+import com.tts.iov.gps.GpsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class IovTaskRunnerService {
     @Autowired
     private BaseNodeHeartbeatService nodeHeartbeatService;
     @Autowired
-    private FacadeService facadeService;
+    private GpsService gpsService;
     @Autowired
     private IovTrackPointService iovTrackPointService;
 
@@ -270,8 +270,8 @@ public class IovTaskRunnerService {
         for (IovSubscribeTaskVehicle vehicleTask : vehicleTasks) {
             try {
                 // 查询点位
-                FacadeVehicleQueryDto queryDto = initialTrackPointListQueryParam(vehicleTask);
-                List<FacadeCoordinatePointResultDto> pointList = facadeService.queryIovVehicleTrackDirectly(queryDto);
+                GpsVehicleQueryDto queryDto = initialTrackPointListQueryParam(vehicleTask);
+                List<GpsCoordinatePointResultDto> pointList = gpsService.queryIovVehicleTrackDirectly(queryDto);
 
                 // 点位入库
                 List<IovTrackPoint> points = BeanUtils.copyList(pointList, IovTrackPoint.class);
@@ -289,8 +289,8 @@ public class IovTaskRunnerService {
     /**
      * 初始化轨迹查询参数
      */
-    private FacadeVehicleQueryDto initialTrackPointListQueryParam(IovSubscribeTaskVehicle vehicleTask) {
-        FacadeVehicleQueryDto queryDto = new FacadeVehicleQueryDto();
+    private GpsVehicleQueryDto initialTrackPointListQueryParam(IovSubscribeTaskVehicle vehicleTask) {
+        GpsVehicleQueryDto queryDto = new GpsVehicleQueryDto();
         // iov设备类型
         String iovType = iovSubscribeTaskVehicleService.getIovTypeById(vehicleTask.getId());
         queryDto.setIovTypeEnum(IovTypeEnums.parse(iovType));

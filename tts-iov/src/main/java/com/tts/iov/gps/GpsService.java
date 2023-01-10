@@ -1,11 +1,11 @@
-package com.tts.iov.facade;
+package com.tts.iov.gps;
 
 import com.tts.common.exception.ServiceException;
 import com.tts.common.utils.spring.SpringUtils;
-import com.tts.facade.dto.FacadeCoordinatePointResultDto;
-import com.tts.facade.dto.FacadeVehicleQueryDto;
-import com.tts.facade.enums.IovTypeEnums;
-import com.tts.facade.service.IovFacade;
+import com.tts.gps.dto.GpsCoordinatePointResultDto;
+import com.tts.gps.dto.GpsVehicleQueryDto;
+import com.tts.gps.enums.IovTypeEnums;
+import com.tts.gps.service.IovGps;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -14,36 +14,36 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-public class FacadeService implements InitializingBean {
+public class GpsService implements InitializingBean {
 
     /**
      * key: beanName value: service
      */
-    private Map<String, IovFacade> facadeMap;
+    private Map<String, IovGps> gpsServiceMap;
 
     @Override
     public void afterPropertiesSet() {
         // 将所有的GPS类型bean封装起来，根据策略模式按需取
-        facadeMap = SpringUtils.getBeansOfType(IovFacade.class);
+        gpsServiceMap = SpringUtils.getBeansOfType(IovGps.class);
     }
 
-    public List<FacadeCoordinatePointResultDto> queryIovVehicleLastLocationDirectly(FacadeVehicleQueryDto vehicleQueryDto) {
+    public List<GpsCoordinatePointResultDto> queryIovVehicleLastLocationDirectly(GpsVehicleQueryDto vehicleQueryDto) {
         return getSpecificService(vehicleQueryDto.getIovTypeEnum()).queryIovVehicleLastLocationDirectly(vehicleQueryDto);
     }
 
-    public List<FacadeCoordinatePointResultDto> queryIovVehicleTrackDirectly(FacadeVehicleQueryDto vehicleQueryDto) {
+    public List<GpsCoordinatePointResultDto> queryIovVehicleTrackDirectly(GpsVehicleQueryDto vehicleQueryDto) {
         return getSpecificService(vehicleQueryDto.getIovTypeEnum()).queryIovVehicleTrackDirectly(vehicleQueryDto);
     }
 
     /**
      * 获取具体业务类型的服务对象
      */
-    public IovFacade getSpecificService(IovTypeEnums iovTypeEnum) {
+    public IovGps getSpecificService(IovTypeEnums iovTypeEnum) {
         if (iovTypeEnum != null) {
-            Set<String> keySet = facadeMap.keySet();
+            Set<String> keySet = gpsServiceMap.keySet();
             for (String beanName : keySet) {
                 if (beanName.contains(iovTypeEnum.getValue())) {
-                    return facadeMap.get(beanName);
+                    return gpsServiceMap.get(beanName);
                 }
             }
 

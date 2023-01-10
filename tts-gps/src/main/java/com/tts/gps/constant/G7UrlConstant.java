@@ -1,4 +1,4 @@
-package com.tts.facade.constant;
+package com.tts.gps.constant;
 
 /**
  * g7 的访问 url地址

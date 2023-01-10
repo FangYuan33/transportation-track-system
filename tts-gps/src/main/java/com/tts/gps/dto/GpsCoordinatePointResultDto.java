@@ -1,4 +1,4 @@
-package com.tts.facade.dto;
+package com.tts.gps.dto;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2023-01-08 15:28:23
  */
 @Data
-public class FacadeCoordinatePointResultDto {
+public class GpsCoordinatePointResultDto {
 
     /**
      * 车牌号

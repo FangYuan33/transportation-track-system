@@ -7,11 +7,11 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tts.common.exception.ServiceException;
 import com.tts.common.utils.DESUtil;
-import com.tts.facade.enums.IovTypeEnums;
-import com.tts.facade.service.IovFacade;
+import com.tts.gps.enums.IovTypeEnums;
+import com.tts.gps.service.IovGps;
 import com.tts.iov.dao.IovConfigMapper;
 import com.tts.iov.domain.IovConfig;
-import com.tts.iov.facade.FacadeService;
+import com.tts.iov.gps.GpsService;
 import com.tts.iov.service.IovConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
     private final ConcurrentHashMap<String, String> localCache = new ConcurrentHashMap<>(4);
 
     @Autowired
-    private FacadeService facadeService;
+    private GpsService gpsService;
 
     @Override
     public void initialIovConfig() {
@@ -70,7 +70,7 @@ public class IovConfigServiceImpl extends ServiceImpl<IovConfigMapper, IovConfig
             try {
                 IovConfig iovConfig = JSONObject.parseObject(localCache.get(iovType), IovConfig.class);
 
-                IovFacade specificService = facadeService.getSpecificService(IovTypeEnums.parse(iovType));
+                IovGps specificService = gpsService.getSpecificService(IovTypeEnums.parse(iovType));
                 specificService.initialConfigInfo(JSONObject.parseObject(iovConfig.getConfigInfo(), Map.class));
             } catch (Exception e) {
                 log.error("Initial IovType [" + iovType + "] Config Info Error", e);

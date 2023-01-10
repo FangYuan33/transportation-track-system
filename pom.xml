@@ -96,10 +96,10 @@
                 <version>${tts.version}</version>
             </dependency>
 
-            <!-- facade模块 -->
+            <!-- gps模块 -->
             <dependency>
                 <groupId>com.tts</groupId>
-                <artifactId>tts-facade</artifactId>
+                <artifactId>tts-gps</artifactId>
                 <version>${tts.version}</version>
             </dependency>
 
@@ -162,7 +162,7 @@
         <module>tts-node</module>
         <module>tts-iov</module>
         <module>tts-remote</module>
-        <module>tts-facade</module>
+        <module>tts-gps</module>
     </modules>
     <packaging>pom</packaging>
 

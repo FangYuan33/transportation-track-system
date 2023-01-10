@@ -1,4 +1,4 @@
-package com.tts.facade.enums;
+package com.tts.gps.enums;
 
 public enum IovTypeEnums {
 

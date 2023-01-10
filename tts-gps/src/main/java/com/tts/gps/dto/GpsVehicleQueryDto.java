@@ -1,6 +1,6 @@
-package com.tts.facade.dto;
+package com.tts.gps.dto;
 
-import com.tts.facade.enums.IovTypeEnums;
+import com.tts.gps.enums.IovTypeEnums;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * @since 2023-01-08 15:33:21
  */
 @Data
-public class FacadeVehicleQueryDto {
+public class GpsVehicleQueryDto {
 
     private String carrierCode;
 

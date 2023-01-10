@@ -31,7 +31,7 @@
 
         <dependency>
             <groupId>com.tts</groupId>
-            <artifactId>tts-facade</artifactId>
+            <artifactId>tts-gps</artifactId>
         </dependency>
 
         <dependency>

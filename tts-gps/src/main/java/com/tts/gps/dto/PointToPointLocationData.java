@@ -1,4 +1,4 @@
-package com.tts.facade.dto;
+package com.tts.gps.dto;
 
 import lombok.Data;
 

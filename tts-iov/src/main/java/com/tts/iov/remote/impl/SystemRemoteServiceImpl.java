@@ -1,11 +1,11 @@
 package com.tts.iov.remote.impl;
 
 import com.tts.common.utils.spring.BeanUtils;
-import com.tts.facade.dto.FacadeCoordinatePointResultDto;
-import com.tts.facade.dto.FacadeVehicleQueryDto;
-import com.tts.facade.enums.IovTypeEnums;
+import com.tts.gps.dto.GpsCoordinatePointResultDto;
+import com.tts.gps.dto.GpsVehicleQueryDto;
+import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovConfig;
-import com.tts.iov.facade.FacadeService;
+import com.tts.iov.gps.GpsService;
 import com.tts.iov.service.IovConfigService;
 import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.iov.service.IovSubscribeTaskVehicleService;
@@ -31,7 +31,7 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     @Autowired
     private IovSubscribeTaskVehicleService iovSubscribeTaskVehicleService;
     @Autowired
-    private FacadeService facadeService;
+    private GpsService gpsService;
 
     @Override
     public boolean saveOrUpdateIovConfig(IovConfigDto iovConfig) {
@@ -61,10 +61,10 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     @Override
     public List<CoordinatePointResultDto> queryIovVehicleLastLocationDirectly(IovVehicleQueryDto vehicleQueryDto) {
         // 入参类型转换
-        FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
-        facadeVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
+        GpsVehicleQueryDto gpsVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, GpsVehicleQueryDto.class);
+        gpsVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
 
-        List<FacadeCoordinatePointResultDto> result = facadeService.queryIovVehicleLastLocationDirectly(facadeVehicleQueryDto);
+        List<GpsCoordinatePointResultDto> result = gpsService.queryIovVehicleLastLocationDirectly(gpsVehicleQueryDto);
 
         // 出参类型转换
         return BeanUtils.copyList(result, CoordinatePointResultDto.class);
@@ -73,10 +73,10 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     @Override
     public List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto) {
         // 入参类型转换
-        FacadeVehicleQueryDto facadeVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, FacadeVehicleQueryDto.class);
-        facadeVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
+        GpsVehicleQueryDto gpsVehicleQueryDto = BeanUtils.copyProperties2(vehicleQueryDto, GpsVehicleQueryDto.class);
+        gpsVehicleQueryDto.setIovTypeEnum(IovTypeEnums.parse(vehicleQueryDto.getIovTypeEnum().getValue()));
 
-        List<FacadeCoordinatePointResultDto> result = facadeService.queryIovVehicleTrackDirectly(facadeVehicleQueryDto);
+        List<GpsCoordinatePointResultDto> result = gpsService.queryIovVehicleTrackDirectly(gpsVehicleQueryDto);
 
         // 出参类型转换
         return BeanUtils.copyList(result, CoordinatePointResultDto.class);
