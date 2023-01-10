@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 调用GPS服务时，注入这个Bean即可
+ * 调用GPS服务时，注入这个Service即可
  * <p>
  * 使用了策略模式，在具体调用处不用关注具体的类型，在这里会做出具体的Service分配
  * 避免了在使用时不清楚调用哪个类型或需要注入多种GpsService的困扰
@@ -23,7 +23,7 @@ import java.util.Set;
 public class GpsService implements InitializingBean {
 
     /**
-     * key: beanName value: service
+     * key: iovTypeName value: service
      */
     private Map<String, IovGps> gpsServiceMap;
 
