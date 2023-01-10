@@ -90,16 +90,16 @@ public class IovTaskRunnerService {
     }
 
     /**
-     * 初始化任务
+     * 初始化节点任务
      */
     private void initialTask() {
         while (true) {
             // leader节点负责检查心跳和分配任务
             if (node.getIsLeader().get()) {
-                closeFollowerThread();
+                // 处理leader节点的任务，心跳检测和分配任务
                 processLeaderTask();
             } else {
-                // 普通节点将被分配的任务设置为运行状态，启动任务线程
+                // 普通节点将被分配的任务设置为运行状态，并启动任务线程执行
                 runningTask();
             }
 
