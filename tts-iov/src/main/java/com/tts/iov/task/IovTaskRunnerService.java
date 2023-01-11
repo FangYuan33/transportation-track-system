@@ -96,6 +96,8 @@ public class IovTaskRunnerService {
         while (true) {
             // leader节点负责检查心跳和分配任务
             if (node.getIsLeader().get()) {
+                // 若之前为子节点，则需要把该子任务线程关掉
+                closeFollowerTaskThread();
                 // 处理leader节点的任务，心跳检测和分配任务
                 processLeaderTask();
             } else {
@@ -114,11 +116,16 @@ public class IovTaskRunnerService {
     /**
      * 如果之前是普通节点，但是现在成了leader节点，则需要关闭普通节点任务线程
      */
-    private void closeFollowerThread() {
-        if (followerNodeThread != null && followerNodeThread.isAlive()) {
-            followerNodeThreadFlag = false;
+    private void closeFollowerTaskThread() {
+        try {
+            if (followerNodeThread != null && followerNodeThread.isAlive()) {
+                followerNodeThreadFlag = false;
+                followerNodeThread.stop();
 
-            followerNodeThread = null;
+                followerNodeThread = null;
+            }
+        } catch (Exception e) {
+            log.error("Leader Node Close Itself Follower Task Thread Error", e);
         }
     }
 
@@ -148,22 +155,26 @@ public class IovTaskRunnerService {
         if (CollectionUtils.isNotEmpty(runningTasks)) {
             // 获取所有正在运行任务上挂的服务
             List<String> serverNames = runningTasks.stream().map(IovSubscribeTask::getServerName).collect(Collectors.toList());
+            log.info("Service {} Has Task", JSONObject.toJSONString(serverNames));
             // 获取所有服务的心跳时间
             List<BaseNodeHeartbeat> nodeHeartbeats = nodeHeartbeatService.listByServerNames(serverNames);
 
             // 将没有超时的服务节点移除
             for (BaseNodeHeartbeat nodeHeartbeat : nodeHeartbeats) {
                 if (!nodeHeartbeatService.isTimeOut(nodeHeartbeat)) {
+                    log.info("Service {} 's Heartbeat Is Not!!!!! Time Out", JSONObject.toJSONString(serverNames));
                     serverNames.remove(nodeHeartbeat.getServerName());
                 }
             }
 
             // 剩下心跳超时的节点，将其上的未完成的任务全部标记为待分配
             if (CollectionUtils.isNotEmpty(serverNames)) {
+                log.info("Service {} 's Heartbeat Is Time Out!!!!!", JSONObject.toJSONString(serverNames));
                 List<IovSubscribeTask> timeOutTask = iovSubscribeTaskService.listByServerNames(serverNames);
                 for (IovSubscribeTask task : timeOutTask) {
                     if (ALLOCATED.getValue().equals(task.getState()) || RUNNING.getValue().equals(task.getState())) {
                         iovSubscribeTaskService.allocatingTask(task);
+                        log.info("Task {} Is Time Out, Wait To Allocating", JSONObject.toJSONString(task));
                     }
                 }
             }
@@ -256,7 +267,7 @@ public class IovTaskRunnerService {
      * 节点执行点位拉取任务
      */
     private void doRunningTask() {
-        List<IovSubscribeTask> runningTask = iovSubscribeTaskService.listRunningTask();
+        List<IovSubscribeTask> runningTask = iovSubscribeTaskService.listCurrentNodeRunningTask();
         // 获取运行中任务的ID
         List<Long> taskIdList = runningTask.stream().map(IovSubscribeTask::getId).collect(Collectors.toList());
         // 所有车辆任务

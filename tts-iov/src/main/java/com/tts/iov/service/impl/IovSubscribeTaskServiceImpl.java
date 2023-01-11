@@ -173,6 +173,15 @@ public class IovSubscribeTaskServiceImpl extends ServiceImpl<IovSubscribeTaskMap
     }
 
     @Override
+    public List<IovSubscribeTask> listCurrentNodeRunningTask() {
+        LambdaQueryWrapper<IovSubscribeTask> queryWrapper = new QueryWrapper<IovSubscribeTask>().lambda()
+                .eq(IovSubscribeTask::getServerName, TtsContext.getNodeServerName())
+                .eq(IovSubscribeTask::getState, RUNNING.getValue());
+
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public void runningTask(List<Long> ids) {
         if (CollectionUtils.isNotEmpty(ids)) {
             LambdaUpdateWrapper<IovSubscribeTask> updateWrapper = new UpdateWrapper<IovSubscribeTask>().lambda()

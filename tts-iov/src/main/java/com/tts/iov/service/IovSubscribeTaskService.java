@@ -54,6 +54,11 @@ public interface IovSubscribeTaskService {
     List<IovSubscribeTask> listCurrentNodeAllocatedTask();
 
     /**
+     * 获取分配给当前节点的运行状态的任务
+     */
+    List<IovSubscribeTask> listCurrentNodeRunningTask();
+
+    /**
      * 启动已分配的任务
      *
      * @param ids 将所有id的任务改为运行中
