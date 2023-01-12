@@ -62,7 +62,7 @@ mybatis-plus:
 
 # zookeeper配置
 zookeeper:
-  address: 101.43.163.223:2181
+  address: localhost:2181
   sessionTimeout: 10000
   connectTimeout: 20000
   retryCountInterval: 500
@@ -88,6 +88,6 @@ dubbo:
     port: 20800
   registry:
     id: tts-zk-registry
-    address: zookeeper://101.43.163.223:2181
+    address: zookeeper://localhost:2181
   consumer:
     check: false

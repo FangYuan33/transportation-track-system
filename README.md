@@ -6,8 +6,9 @@
 
 ## 2. 其中的要点
 ### 2.1 策略模式在轨迹查询中的应用
-系统中有多种GPS设备服务，每种服务都有对应的实现，采用**策略模式**来解决服务调用时所需GPS服务类型分配问题。
-如下是通用`GpsService`代码实现
+系统中有多种GPS设备服务，每种服务都有对应的实现，既然存在多种服务，那么在服务调用时选取合适的服务便是需要解决的问题。
+
+TTS采用的是策略模式解决上述问题。如下是通用的`GpsService`服务代码实现
 
 ```java
 @Service
@@ -71,14 +72,15 @@ public class GpsService implements InitializingBean {
 ![](images/ttsG7业务图.jpg)
 
 `SystemRemoteService`被其他项目依赖，作为dubbo接口注入，它的实现类中包含`GpsService`，这里使用了上述的策略模式，
-包含具体Gps设备类型的实现，易扩展
+包含具体Gps设备类型的实现，易扩展。整条调用链路只有被标记为`...`的扩展类在新增GPS设备服务时需要进行扩展，
+其他部分代码都无需改动，能够通用。
 
 ### 2.2 车辆订阅任务的执行与分配
 
 TTS采用**多节点集群模式**部署，节点中角色分为`Leader`和`Follower`，其中`Leader`的职责是**检查各个服务的心跳**和**分配订阅任务**给`Follower`节点，
 而`Follower`节点则负责执行订阅任务，集群、订阅任务的高可用保证了服务正常运行。
 
-1. **集群高可用**: 借助zookeeper实现，依赖zookeeper提供的选举来**分配各个节点的角色**，并提供节点管理的方法
+1. **集群高可用**: 借助zookeeper实现，依赖zookeeper提供的选举来**分配各个节点的角色**，并提供节点管理的方法，使用zookeeper实现集群高可用是非常便捷的方式
 2. **订阅任务的高可用**: 每个节点服务都会在规定时间内记录节点心跳，`Leader`节点会定期检查心跳，若某节点心跳超时，
    则会将该节点上**没有结束的任务**重新分配给其他`Follower`节点，以保证订阅任务的高可用
    
@@ -95,7 +97,8 @@ TTS节点实现如下接口
 
 ![](images/TTS节点任务原理类图.jpg)
 
-`TtsNodeTaskRunner`是节点任务服务的启动类，同样会随应用的启动而启动，它其中依赖了`TtsZkNode`节点等其他必要服务，核心任务执行逻辑如下
+`TtsNodeTaskRunner`是节点任务服务的启动类，同样实现了ApplicationRunner接口，会随应用的启动而启动，
+它其中依赖了`TtsZkNode`节点等其他必要服务，核心任务执行逻辑如下
 
 ```java
 /**
@@ -135,6 +138,17 @@ TTS服务各个模块依赖关系清晰明确，如下图所示
 - `tts-remote`: Dubbo RPC 接口模块，供其他项目依赖、调用接口查询点位和订阅任务
 - `tts-framework`: 框架支持，包含一些配置
 - `tts-common`: 通用的枚举和工具类等
+
+## 4. 测试和使用
+
+1. 修改`application.yml`配置文件中`zookeeper.address`和`dubbo.registry.address`地址信息，将它们修改成自己的服务地址
+
+2. 修改application-druid.yml配置文件中的数据库连接配置信息，并创建tts的mysql数据库，执行sql包下的脚本
+ 
+3. 调用SystemRemoteService中saveOrUpdateIovConfig方法添加Gps设备配置信息，以此来调用各Gps供应商接口
+   （这配置一般人哪有？所以开发出一个能自主提供gps数据的接口才能正常测试）
+
+4. 添加多个Service启动配置，启动即可进行验证...
 
 ---
 **That's all.**
