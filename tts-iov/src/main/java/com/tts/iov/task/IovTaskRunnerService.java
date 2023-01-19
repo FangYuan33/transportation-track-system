@@ -106,7 +106,7 @@ public class IovTaskRunnerService {
             try {
                 Thread.sleep(TASK_INTERVAL * 1000);
             } catch (Exception e) {
-                log.error("Node Task sleep error", e);
+                log.error("************* Node Task sleep error *************", e);
             }
         }
     }
@@ -134,7 +134,7 @@ public class IovTaskRunnerService {
             // 分配任务
             allocatingTask();
         } catch (Exception e) {
-            log.error("Process Leader Task Error", e);
+            log.error("************* Process Leader Task Error *************", e);
         }
     }
 
@@ -237,7 +237,7 @@ public class IovTaskRunnerService {
             try {
                 Thread.sleep(FOLLOWER_NODE_TASK_INTERVAL * 1000 * 60);
             } catch (Exception e) {
-                log.error("Follower Node Thread Sleep Error", e);
+                log.error("************* Follower Node Thread Sleep Error *************", e);
             }
         }
     }

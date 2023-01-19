@@ -167,7 +167,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         try {
             treeCache.start();
         } catch (Exception e) {
-            log.error("Start TreeCache Error", e);
+            log.error("************* Start TreeCache Error *************", e);
         }
     }
 
@@ -184,7 +184,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
      * TTS 节点启动方法
      */
     public void start() {
-        log.info("TTS Node {} start!!!", serviceName);
+        log.info("TTS Node {} start >>>>>>", serviceName);
 
         curatorFramework.start();
         leaderSelector.start();
@@ -192,7 +192,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
         createNodePath();
         registerConnectionListener();
 
-        log.info("TTS Node {} start over!!!", serviceName);
+        log.info("TTS Node {} start over <<<<<<", serviceName);
     }
 
     /**
@@ -218,52 +218,52 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
     private void registerConnectionListener() {
         while (true) {
             try {
-                log.info("TTS Node {} register!!!", serviceName);
+                log.info(">>>>>>>> TTS Node {} register!!! >>>>>>", serviceName);
 
                 // 添加链接状态监听器
                 curatorFramework.getConnectionStateListenable().addListener(connectionStateListener);
 
-                log.info("TTS Node {} register over!!!", serviceName);
+                log.info("<<<<<<< TTS Node {} register over!!! <<<<<<<<<", serviceName);
                 break;
             } catch (Exception e) {
-                log.error("TTS Node " + serviceName + " register!!!", e);
+                log.error("************* TTS Node " + serviceName + " register!!! *************", e);
             }
 
             // 休息一秒后重试
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                log.error("TTS Node " + serviceName + " sleep error!!!", e);
+                log.error("************* TTS Node " + serviceName + " sleep error!!! *************", e);
             }
         }
     }
 
     @Override
     public void close() {
-        log.info("TTS Node {} close!!!", serviceName);
+        log.info(">>>>>>>>>> TTS Node {} close!!!  >>>>>>>>", serviceName);
 
         try {
             treeCache.close();
             treeCache = null;
         } catch (Exception e) {
-            log.error("Close TreeCache Error", e);
+            log.error("************* Close TreeCache Error *************", e);
         }
 
         try {
             leaderSelector.close();
             leaderSelector = null;
         } catch (Exception e) {
-            log.error("Close LeaderSelector Error", e);
+            log.error("************* Close LeaderSelector Error *************", e);
         }
 
         try {
             curatorFramework.close();
             curatorFramework = null;
         } catch (Exception e) {
-            log.error("Close CuratorFramework Error", e);
+            log.error("************* Close CuratorFramework Error *************", e);
         }
 
-        log.info("TTS Node {} close over!!!", serviceName);
+        log.info("<<<<<<<<<< TTS Node {} close over!!! <<<<<<<<<<<", serviceName);
     }
 
     /**
@@ -282,7 +282,7 @@ public class TtsZkNode extends LeaderSelectorListenerAdapter implements Closeabl
             }
             return Collections.emptyList();
         } catch (Exception e) {
-            log.error("TTS Node getAllServerIpList error !!!", e);
+            log.error("************* TTS Node getAllServerIpList error !!! *************", e);
 
             return Collections.emptyList();
         }

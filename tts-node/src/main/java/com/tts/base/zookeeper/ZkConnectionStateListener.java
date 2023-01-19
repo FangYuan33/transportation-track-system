@@ -29,7 +29,7 @@ public class ZkConnectionStateListener implements ConnectionStateListener {
 
         // SUSPENDED重试链接
         if (ConnectionState.SUSPENDED.equals(connectionState)) {
-            log.error("Connection has been lost, wait restart!");
+            log.error("************* Connection has been lost, wait restart! *************");
 
             // 先关闭再试试启动
             ttsZkNode.close();
