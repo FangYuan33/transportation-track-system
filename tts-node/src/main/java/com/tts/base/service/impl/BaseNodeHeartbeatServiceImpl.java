@@ -71,7 +71,7 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
             // 开启线程执行任务
             heartbeatThread.start();
         } catch (Exception e) {
-            log.error("Start Heartbeat Task Error", e);
+            log.error("************* Start Heartbeat Task Error *************", e);
         }
     }
 
@@ -120,7 +120,7 @@ public class BaseNodeHeartbeatServiceImpl extends ServiceImpl<BaseNodeHeartbeatM
             try {
                 Thread.sleep(HEARTBEAT_INTERVAL);
             } catch (Exception e) {
-                log.error("Node heartbeat sleep error", e);
+                log.error("************* Node heartbeat sleep error *************", e);
             }
         }
     }

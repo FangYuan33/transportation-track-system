@@ -27,12 +27,12 @@ public class TtsNodeRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("TTS Node Runner start!!!");
+        log.info(">>>>>> TTS Node Runner start >>>>>>");
         ttsZkNode.start();
-        log.info("TTS Node Runner start over!!!");
+        log.info("<<<<<< TTS Node Runner start over <<<<<<");
 
-        log.info("TTS Node Heartbeat start!!!");
+        log.info(">>>>>> TTS Node Heartbeat start >>>>>>");
         nodeHeartbeatService.startHeartbeat();
-        log.info("TTS Node Heartbeat start over!!!");
+        log.info("<<<<<< TTS Node Heartbeat start over <<<<<<");
     }
 }
