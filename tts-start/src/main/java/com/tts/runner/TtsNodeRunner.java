@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 1. 启动节点
  * 2. 记录节点心跳
  *
- * @author wangyilong13
+ * @author FangYuan
  * @since 2022-12-29 15:13:48
  */
 @Slf4j
