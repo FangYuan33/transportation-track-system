@@ -63,8 +63,8 @@ mybatis-plus:
 # zookeeper配置
 zookeeper:
   address: localhost:2181
-  sessionTimeout: 10000
-  connectTimeout: 20000
+  sessionTimeout: 300000
+  connectTimeout: 300000
   retryCountInterval: 500
   masterPath: /tts/server/master
   treePath: /tts/server/tree
@@ -89,5 +89,8 @@ dubbo:
   registry:
     id: tts-zk-registry
     address: zookeeper://localhost:2181
+    timeout: 300000
+    parameters:
+      blockUntilConnectedWait: 300
   consumer:
     check: false
