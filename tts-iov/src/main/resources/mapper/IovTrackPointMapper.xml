@@ -2,4 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.tts.iov.dao.IovTrackPointMapper">
 
+    <sql id="all_column">
+        id,vehicle_no,latitude,longitude,speed,direction,altitude,address,time
+    </sql>
+
+    <select id="queryIovTrackPointByCondition" parameterType="com.tts.remote.dto.IovTrackPointQueryDto" resultType="com.tts.iov.domain.IovTrackPoint">
+        select
+        <include refid="all_column" />
+        from iov_track_point
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="vehicleNo != null and vehicleNo != ''">
+                and vehicle_no = #{vehicleNo}
+            </if>
+            <if test="latitude != null and latitude != ''">
+                and latitude = #{latitude}
+            </if>
+            <if test="longitude != null and longitude != ''">
+                and longitude = #{longitude}
+            </if>
+            <if test="speed != null and speed != ''">
+                and speed = #{speed}
+            </if>
+            <if test="direction != null and direction != ''">
+                and direction = #{direction}
+            </if>
+            <if test="altitude != null and altitude != ''">
+                and altitude = #{altitude}
+            </if>
+            <if test="address != null and address != ''">
+                and address = #{address}
+            </if>
+        </where>
+    </select>
+
 </mapper>

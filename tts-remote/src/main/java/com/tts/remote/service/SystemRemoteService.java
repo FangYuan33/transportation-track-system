@@ -1,9 +1,6 @@
 package com.tts.remote.service;
 
-import com.tts.remote.dto.CoordinatePointResultDto;
-import com.tts.remote.dto.IovConfigDto;
-import com.tts.remote.dto.IovSubscribeTaskVehicleDto;
-import com.tts.remote.dto.IovVehicleQueryDto;
+import com.tts.remote.dto.*;
 
 import java.util.List;
 
@@ -45,4 +42,11 @@ public interface SystemRemoteService {
      * 一次只能查询一个车的轨迹
      */
     List<CoordinatePointResultDto> queryIovVehicleTrackDirectly(IovVehicleQueryDto vehicleQueryDto);
+
+    /**
+     * 获取点位
+     * @param iovTrackPointQueryDto
+     * @return
+     */
+    List<IovTrackPointResultDto> queryIovTrackPoints(IovTrackPointQueryDto iovTrackPointQueryDto);
 }
