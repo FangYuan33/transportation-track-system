@@ -6,13 +6,12 @@ import com.tts.gps.dto.GpsVehicleQueryDto;
 import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovConfig;
 import com.tts.gps.GpsService;
+import com.tts.iov.domain.IovTrackPoint;
 import com.tts.iov.service.IovConfigService;
 import com.tts.iov.service.IovSubscribeTaskService;
 import com.tts.iov.service.IovSubscribeTaskVehicleService;
-import com.tts.remote.dto.CoordinatePointResultDto;
-import com.tts.remote.dto.IovConfigDto;
-import com.tts.remote.dto.IovSubscribeTaskVehicleDto;
-import com.tts.remote.dto.IovVehicleQueryDto;
+import com.tts.iov.service.IovTrackPointService;
+import com.tts.remote.dto.*;
 import com.tts.remote.service.SystemRemoteService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,9 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
     private IovSubscribeTaskVehicleService iovSubscribeTaskVehicleService;
     @Autowired
     private GpsService gpsService;
+
+    @Autowired
+    private IovTrackPointService iovTrackPointService;
 
     @Override
     public boolean saveOrUpdateIovConfig(IovConfigDto iovConfig) {
@@ -80,5 +82,13 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
 
         // 出参类型转换
         return BeanUtils.copyList(result, CoordinatePointResultDto.class);
+    }
+
+    @Override
+    public List<IovTrackPointResultDto> queryIovTrackPoints(IovTrackPointQueryDto iovTrackPointQueryDto) {
+        List<IovTrackPoint> iovTrackPoints = iovTrackPointService.queryIovTrackPointByCondition(iovTrackPointQueryDto);
+
+        // 出参类型转换
+        return BeanUtils.copyList(iovTrackPoints, IovTrackPointResultDto.class);
     }
 }
