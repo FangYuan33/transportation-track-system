@@ -2,11 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.tts.iov.dao.IovTrackPointMapper">
 
+    <resultMap id="iovTrackPoint" type="com.tts.iov.domain.IovTrackPoint">
+        <result column="id" property="id" />
+        <result column="vehicle_no" property="vehicleNo" />
+        <result column="latitude" property="latitude" />
+        <result column="longitude" property="longitude" />
+        <result column="speed" property="speed" />
+        <result column="direction" property="direction" />
+        <result column="altitude" property="altitude" />
+        <result column="address" property="address" />
+        <result column="time" property="time" />
+    </resultMap>
+
     <sql id="all_column">
         id,vehicle_no,latitude,longitude,speed,direction,altitude,address,time
     </sql>
 
-    <select id="queryIovTrackPointByCondition" parameterType="com.tts.remote.dto.IovTrackPointQueryDto" resultType="com.tts.iov.domain.IovTrackPoint">
+    <select id="queryIovTrackPointByCondition" parameterType="com.tts.gps.dto.TrackPointQueryDto" resultMap="iovTrackPoint">
         select
         <include refid="all_column" />
         from iov_track_point

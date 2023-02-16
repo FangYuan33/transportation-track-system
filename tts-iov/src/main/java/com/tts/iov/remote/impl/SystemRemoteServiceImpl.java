@@ -3,6 +3,7 @@ package com.tts.iov.remote.impl;
 import com.tts.common.utils.spring.BeanUtils;
 import com.tts.gps.dto.GpsCoordinatePointResultDto;
 import com.tts.gps.dto.GpsVehicleQueryDto;
+import com.tts.gps.dto.TrackPointQueryDto;
 import com.tts.gps.enums.IovTypeEnums;
 import com.tts.iov.domain.IovConfig;
 import com.tts.gps.GpsService;
@@ -86,7 +87,11 @@ public class SystemRemoteServiceImpl implements SystemRemoteService {
 
     @Override
     public List<IovTrackPointResultDto> queryIovTrackPoints(IovTrackPointQueryDto iovTrackPointQueryDto) {
-        List<IovTrackPoint> iovTrackPoints = iovTrackPointService.queryIovTrackPointByCondition(iovTrackPointQueryDto);
+        // 入参类型转换
+        TrackPointQueryDto trackPointQueryDto = BeanUtils.copyProperties2(iovTrackPointQueryDto, TrackPointQueryDto.class);
+
+        // 点位查询
+        List<IovTrackPoint> iovTrackPoints = iovTrackPointService.queryIovTrackPointByCondition(trackPointQueryDto);
 
         // 出参类型转换
         return BeanUtils.copyList(iovTrackPoints, IovTrackPointResultDto.class);
