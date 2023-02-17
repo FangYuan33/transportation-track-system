@@ -9,29 +9,9 @@ public class IovTrackPointQueryDto implements Serializable {
     private String vehicleNo;
 
     /**
-     * 纬度
-     */
-    private String latitude;
-
-    /**
-     * 经度
-     */
-    private String longitude;
-
-    /**
-     * 速度
-     */
-    private String speed;
-
-    /**
      * 方向
      */
     private String direction;
-
-    /**
-     * 海拔高度
-     */
-    private String altitude;
 
     /**
      * 定位时间
@@ -51,29 +31,6 @@ public class IovTrackPointQueryDto implements Serializable {
         this.vehicleNo = vehicleNo;
     }
 
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(String speed) {
-        this.speed = speed;
-    }
 
     public String getDirection() {
         return direction;
@@ -81,14 +38,6 @@ public class IovTrackPointQueryDto implements Serializable {
 
     public void setDirection(String direction) {
         this.direction = direction;
-    }
-
-    public String getAltitude() {
-        return altitude;
-    }
-
-    public void setAltitude(String altitude) {
-        this.altitude = altitude;
     }
 
     public String getTime() {

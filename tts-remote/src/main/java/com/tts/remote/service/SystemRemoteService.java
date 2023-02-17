@@ -45,8 +45,6 @@ public interface SystemRemoteService {
 
     /**
      * 获取点位
-     * @param iovTrackPointQueryDto
-     * @return
      */
     List<IovTrackPointResultDto> queryIovTrackPoints(IovTrackPointQueryDto iovTrackPointQueryDto);
 }
